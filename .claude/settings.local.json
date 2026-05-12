@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(New-Item -Path \"C:\\\\Users\\\\user\\\\Documents\\\\ANDREI_FILES\\\\DEVFILES\\\\PROJECTS\\\\Pitiq Mobile\\\\SESSION.md\" -ItemType File -Force)",
+      "Bash(Out-Null)",
+      "PowerShell(New-Item *)",
+      "Bash(rtk ls *)",
+      "Bash(git *)"
+    ]
+  }
+}
