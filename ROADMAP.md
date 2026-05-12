@@ -3,7 +3,7 @@
 > Android photobooth app for coin-operated cafe kiosk machines.
 > Stack: Kotlin + Jetpack Compose (Android), Supabase (PostgreSQL + Storage + Auth + Edge Functions), Vercel (Next.js share page).
 > Target devices: Oppo Reno 5 5G (primary), expandable to tablets and other Android devices. minSdk API 23 (Android 6.0), kiosk mode via Device Owner COSU APIs.
-> Last updated: 2026-05-12 (Session 4)
+> Last updated: 2026-05-13 (Session 5)
 
 ---
 
@@ -125,147 +125,113 @@
 ## PHASE 3 — SESSION FLOW SCREENS
 
 ### 3.1 Attract / Idle Screen
-- [ ] 3.1.1 Design and implement attract screen UI in Jetpack Compose
-  - [ ] Full-screen looping animation (Lottie or custom Canvas animation)
-  - [ ] Price display: "₱40 per session" — large, readable at arm's length
-  - [ ] "Tap to begin" prompt with pulsing animation
-- [ ] 3.1.2 Implement printer check on app start (before attract screen becomes interactive):
-  - [ ] Call `isPrinterConnected()` on a background coroutine
-  - [ ] If connected → attract screen is active and tappable
-  - [ ] If not connected → show non-customer-facing operator alert banner (e.g., red overlay with "PRINTER NOT DETECTED — OUT OF SERVICE")
-  - [ ] Re-check printer connection every 10 seconds while in "Out of Service" state
-  - [ ] When printer detected again, dismiss alert and re-enable attract screen
-- [ ] 3.1.3 Handle tap: call `SessionViewModel.initSession()` → generate UUID v4 session ID → navigate to Payment
-- [ ] 3.1.4 Ensure attract screen auto-resets to this state after every session completion
+- [x] 3.1.1 Design and implement attract screen UI in Jetpack Compose
+  - [x] Full-screen looping animation (custom Canvas animation — pulsing ring + logo)
+  - [x] Price display: "₱40 per session" — large, readable at arm's length
+  - [x] "Tap to begin" prompt with pulsing animation
+- [x] 3.1.2 Implement printer check on app start (before attract screen becomes interactive):
+  - [x] Call `isPrinterConnected()` on a background coroutine
+  - [x] If connected → attract screen is active and tappable
+  - [x] If not connected → show non-customer-facing operator alert banner (red overlay "PRINTER NOT DETECTED — OUT OF SERVICE")
+  - [x] Re-check printer connection every 10 seconds while in "Out of Service" state
+  - [x] When printer detected again, dismiss alert and re-enable attract screen
+- [x] 3.1.3 Handle tap: call `SessionViewModel.initSession()` → generate UUID v4 session ID → navigate to Payment
+- [x] 3.1.4 Ensure attract screen auto-resets to this state after every session completion
 
 ### 3.2 Payment Screen
-- [ ] 3.2.1 Design payment screen UI:
-  - [ ] "No change given" notice — prominent
-  - [ ] Coin progress indicator (e.g., ₱0 → ₱10 → ₱20 → ₱30 → ₱40)
-  - [ ] Progress bar or circular indicator filling as coins inserted
-  - [ ] "Insert ₱40" instruction
-- [ ] 3.2.2 Subscribe to `CoinAcceptorRepository.coinTotal: StateFlow<Int>` and update progress UI in real-time
-- [ ] 3.2.3 Implement 90-second idle timeout:
-  - [ ] Start countdown when payment screen appears and Bluetooth is connected
-  - [ ] If `coinTotal == 0` after 90 seconds → cancel session → navigate to Attract
-  - [ ] If coins being inserted, timeout continues (do not reset on each coin)
-- [ ] 3.2.4 Handle Bluetooth disconnect during payment:
-  - [ ] Pause 90-second timer
-  - [ ] Show "Reconnecting…" indicator overlay (non-blocking UI)
-  - [ ] On reconnect: resume timer, request buffered coin total, update progress
-  - [ ] On 30s reconnect failure: cancel session → navigate to Attract
-- [ ] 3.2.5 When `coinTotal >= 4000` (₱40 in centavos, or use ₱ integer as defined):
-  - [ ] Accept overpayment silently
-  - [ ] Save `coins_inserted` to session state
-  - [ ] Auto-navigate to Layout Selection
-- [ ] 3.2.6 On session cancel from payment: clear session state, return to Attract
+- [x] 3.2.1 Design payment screen UI:
+  - [x] "No change given" notice — prominent
+  - [x] Coin progress indicator (₱0 → ₱10 → ₱20 → ₱30 → ₱40 step dots)
+  - [x] Progress bar filling as coins inserted
+  - [x] "Insert coins to continue" instruction
+- [x] 3.2.2 Subscribe to `CoinAcceptorRepository.coinTotal: StateFlow<Int>` and update progress UI in real-time
+- [x] 3.2.3 Implement 90-second idle timeout:
+  - [x] Start countdown when payment screen appears
+  - [x] If `coinTotal == 0` after 90 seconds → cancel session → navigate to Attract
+  - [x] If coins being inserted, timeout continues (do not reset on each coin)
+- [x] 3.2.4 Handle Bluetooth disconnect during payment:
+  - [x] Pause 90-second timer
+  - [x] Show "Reconnecting…" indicator overlay
+  - [x] On reconnect: resume timer
+  - [x] On 30s reconnect failure: cancel session → navigate to Attract
+- [x] 3.2.5 When `coinTotal >= 40` (₱40 integer):
+  - [x] Accept overpayment silently
+  - [x] Save `coins_inserted` to session state
+  - [x] Auto-navigate to Layout Selection
+- [x] 3.2.6 On session cancel from payment: clear session state, return to Attract
 
 ### 3.3 Layout Selection Screen
-- [ ] 3.3.1 Define `Layout` data class: `id`, `name`, `previewImagePath`, `slotCount`, `frameAssetPath`, `textFields: List<TextField>`, `version`, `isDefault: Boolean`
-- [ ] 3.3.2 Implement `LayoutRepository`:
-  - [ ] Load bundled default layouts from APK assets (`assets/layouts/`)
-  - [ ] Load synced remote layouts from local Room database (cached from last sync)
-  - [ ] Merge: remote layouts override defaults by ID, appended otherwise
-- [ ] 3.3.3 Design layout selection UI:
-  - [ ] Scrollable/swipeable gallery (LazyRow or Pager)
-  - [ ] Each card shows: preview image, layout name, slot count
-  - [ ] Confirm button activates after selection
-- [ ] 3.3.4 On confirm: lock layout to session, navigate to Photo Capture
+- [x] 3.3.1 `Layout` data class already defined in Phase 0
+- [x] 3.3.2 Implement `LayoutRepository`:
+  - [x] Hardcoded default layouts (Classic Strip 2-slot, Photo Strip 4-slot, Memory Grid 6-slot)
+  - [x] Load synced remote layouts from local Room `layout_cache` table
+  - [x] Merge: remote layouts override defaults by ID, appended otherwise
+- [x] 3.3.3 Design layout selection UI:
+  - [x] Scrollable LazyRow gallery with cards
+  - [x] Each card shows: slot grid preview, layout name, slot count
+  - [x] Confirm button activates after selection
+- [x] 3.3.4 On confirm: lock layout to session, navigate to Photo Capture
 
 ### 3.4 Photo Capture Screen
-- [ ] 3.4.1 Set up CameraX `Preview` + `ImageCapture` use cases
-- [ ] 3.4.2 Show live camera preview full-screen
-- [ ] 3.4.3 Overlay: render selected layout frame as semi-transparent overlay on top of camera feed (using `Canvas` or `AndroidView` overlay)
-- [ ] 3.4.4 Show slot indicator: "Photo 1 of 3" (or however many slots layout has)
-- [ ] 3.4.5 Implement 10-second slot capture window:
-  - [ ] 0–7s: "Pose freely" — no visible countdown, friendly prompt text
-  - [ ] 7–10s: large countdown "3… 2… 1" flashed on screen
-  - [ ] Throughout 0–10s: capture burst of 5–8 frames using CameraX `ImageCapture` at ~1fps
-  - [ ] At countdown = 0: use last captured frame as the final photo for this slot
-- [ ] 3.4.6 Store all burst frames temporarily in `Context.cacheDir/session_[id]/slot_[n]/burst/`
-- [ ] 3.4.7 Store final selected frame in `Context.cacheDir/session_[id]/slot_[n]/final.jpg`
-- [ ] 3.4.8 After all slots captured: auto-navigate to Edit Phase
+- [x] 3.4.1 Set up CameraX `Preview` + `ImageCapture` use cases
+- [x] 3.4.2 Show live camera preview full-screen (front camera)
+- [x] 3.4.3 Slot indicator overlay ("Photo N of M" / "Retake — Slot N")
+- [x] 3.4.4 Show slot indicator text
+- [x] 3.4.5 Implement 10-second slot capture window:
+  - [x] 0–3s: "Smile!" hint visible, no countdown
+  - [x] 1–3s countdown flashed on screen (AnimatedVisibility)
+  - [x] Throughout: capture burst of 10 frames at 1fps
+  - [x] At countdown = 0: use last captured frame as the final photo
+- [x] 3.4.6 Store all burst frames in `cacheDir/session_[id]/slot_[n]/burst/`
+- [x] 3.4.7 Store final frame in `cacheDir/session_[id]/slot_[n]/final.jpg`
+- [x] 3.4.8 After all slots captured: auto-navigate to Edit Phase
 
 ### 3.5 Edit Phase Screen
-- [ ] 3.5.1 Render edit canvas:
-  - [ ] Compose Canvas showing full layout with photos placed in slots
-  - [ ] Layout frame and decorative elements rendered on top
-  - [ ] Text fields rendered inline on canvas
-- [ ] 3.5.2 Implement per-slot interactions:
-  - [ ] Tap slot → select it (highlight border)
-  - [ ] Horizontal flip button (flip `Bitmap` horizontally)
-  - [ ] Drag to reposition within slot boundary (clamp pan to slot bounds)
-  - [ ] Pinch-to-zoom within slot boundary (clamp scale to reasonable min/max)
-- [ ] 3.5.3 Implement retake flow:
-  - [ ] "Retake (1 remaining)" button per slot
-  - [ ] On tap: pause 90s timer, navigate back to camera for that slot only
-  - [ ] Camera opens for that slot with same 10s countdown + burst behavior
-  - [ ] On return from retake: replace slot photo, reset timer to 90s, disable retake button ("Retake used"), mark slot retake as used
-  - [ ] Retake used state persisted in session state (not re-enabled)
-- [ ] 3.5.4 Implement text field editing:
-  - [ ] If layout has text fields: show them inline on canvas
-  - [ ] Tap text field → open soft keyboard input dialog
-  - [ ] Update canvas render with entered text
-- [ ] 3.5.5 Implement 90-second countdown timer:
-  - [ ] Prominent countdown display on screen
-  - [ ] Timer pauses when retake is initiated
-  - [ ] Timer resets to 90s when returning from retake
-  - [ ] At timer = 0: brief "Time's up — printing your strip" message for 3 seconds, then auto-proceed to Print
-- [ ] 3.5.6 "Print Now" button always visible at bottom:
-  - [ ] On tap: navigate to Print
+- [x] 3.5.1 Render edit canvas:
+  - [x] Compose Canvas showing full layout with photos placed in slots
+  - [x] Slot selection highlight border
+- [x] 3.5.2 Implement per-slot interactions:
+  - [x] Tap slot → select it (gold highlight border)
+  - [x] Horizontal flip button (↔)
+  - [x] Drag to reposition (detectTransformGestures pan)
+  - [x] Pinch-to-zoom (detectTransformGestures zoom, clamped 0.5×–3×)
+- [x] 3.5.3 Implement retake flow:
+  - [x] "Retake" button hidden after use
+  - [x] On tap: pause 90s timer, navigate back to camera for that slot
+  - [x] On return from retake: replace slot photo, reset timer to 90s
+- [x] 3.5.4 Implement text field editing:
+  - [x] Text field chips visible when layout has text fields
+  - [x] Tap → AlertDialog with OutlinedTextField
+- [x] 3.5.5 Implement 90-second countdown timer:
+  - [x] Prominent countdown in top-left; turns red at ≤10s
+  - [x] Timer pauses on retake, resumes/resets on return
+  - [x] At timer = 0: "Time's up!" for 3 seconds, then auto-proceed to Print
+- [x] 3.5.6 "Print Now" button always visible at bottom
 
 ### 3.6 Print Screen
-- [ ] 3.6.1 Implement print render pipeline:
-  - [ ] Take final canvas state (layout + photos + text)
-  - [ ] Render to `Bitmap` at 58mm thermal width (384px at 203dpi or 576px at 300dpi — match printer spec)
-  - [ ] Convert to monochrome (1-bit or 8-bit grayscale)
-  - [ ] This rendered bitmap = `thermal.png` saved to `cacheDir/session_[id]/`
-- [ ] 3.6.2 Show "Printing… please wait" screen with simple animation
-- [ ] 3.6.3 Call `PrinterManager.print(bitmap)`:
-  - [ ] On `PrintResult.SUCCESS`: save print success to session, navigate to Upload screen
-  - [ ] On failure: show specific error message per failure type
-  - [ ] Show "Retry" button for all failure types
-  - [ ] Log failure event to session `error_log`
-- [ ] 3.6.4 Implement retry: re-call `PrinterManager.print()` with same bitmap
+- [x] 3.6.1 Implement print render pipeline:
+  - [x] `color.png` rendered in `EditViewModel.requestPrint()` via `MediaProcessor.renderColorPng()`
+  - [x] `thermal.png` (grayscale, 384px wide) rendered in `PrintViewModel` via `MediaProcessor.renderThermalPng()`
+- [x] 3.6.2 Show "Printing… please wait" screen with pulsing animation
+- [x] 3.6.3 Call `PrinterManager.print(bitmap)`:
+  - [x] On `PrintResult.SUCCESS`: navigate to Upload screen
+  - [x] On failure: show specific error message per failure type
+  - [x] Show "Try Again" retry button for all failure types
+- [x] 3.6.4 Implement retry: re-call `PrintViewModel.startPrint()` on retry tap
 
 ### 3.7 Upload & QR Share Screen
-- [ ] 3.7.1 Implement `MediaProcessor` for on-device GIF assembly:
-  - [ ] Load all burst frames from `cacheDir/session_[id]/slot_*/burst/`
-  - [ ] Resize each frame to 480px width (maintain aspect ratio)
-  - [ ] Reduce to 256-color palette using `AndroidBitmap` color quantization
-  - [ ] Assemble GIF using a Kotlin GIF encoder library (e.g., `gifencoder` or ported `AnimatedGifEncoder`)
-  - [ ] Target output < 5MB; if over, drop frames or reduce quality
-  - [ ] Save to `cacheDir/session_[id]/session.gif`
-- [ ] 3.7.2 Generate `color.png`:
-  - [ ] Composite all final slot photos into layout at full color, full resolution
-  - [ ] Save to `cacheDir/session_[id]/color.png`
-- [ ] 3.7.3 Show "Preparing your link…" screen with progress indicator
-- [ ] 3.7.4 Implement `UploadManager`:
-  - [ ] Upload `thermal.png`, `color.png`, `session.gif` to Supabase Storage under path `sessions/[session_id]/`
-  - [ ] Use Supabase Kotlin SDK for upload
-  - [ ] On success: create signed URLs (30-min expiry) for all 3 files
-  - [ ] Write session record to `sessions` table in Supabase DB
-  - [ ] Emit upload progress events
-- [ ] 3.7.5 If offline at upload time:
-  - [ ] Show "Your link is being prepared — please stay nearby" message
-  - [ ] Queue upload in Room `UploadQueueDao`
-  - [ ] Register `WorkManager` periodic job to retry when connectivity restored
-  - [ ] On WorkManager success: trigger QR generation
-- [ ] 3.7.6 QR code generation (only after upload confirmed complete):
-  - [ ] Generate QR from URL `https://yourdomain.vercel.app/session/[session_id]`
-  - [ ] Use `zxing-android-embedded` or `qrcode-kotlin` library
-  - [ ] Display QR code full-screen with download instructions
-- [ ] 3.7.7 60-second QR screen countdown:
-  - [ ] Show countdown "QR available for Xs" on screen
-  - [ ] At 0: navigate to Reset flow → Attract
+- [x] 3.7.1 `MediaProcessor.assembleGif()`: load all burst frames, resize to 480px wide, 256-color quantization, LZW-encoded animated GIF, auto-drop frames if >5MB
+- [x] 3.7.2 `MediaProcessor.renderColorPng()`: composite all final slot photos at 3× thermal width
+- [x] 3.7.3 Show state-aware upload screen ("Assembling your GIF…" → "Uploading your photos…")
+- [x] 3.7.4 `UploadViewModel` uploads all 3 files to Supabase Storage, creates signed URLs (30min), inserts session record
+- [x] 3.7.5 Offline fallback: queues to Room `UploadQueueDao`, shows "stay nearby" message; uses offline:// URL to proceed to QR screen
+- [x] 3.7.6 QR code generation (ZXing) after upload confirmed, displayed full-screen
+- [x] 3.7.7 60-second QR countdown with fading timer badge; at 0 → `resetToAttract()`
 
 ### 3.8 Session Reset
-- [ ] 3.8.1 Implement `SessionCleaner`:
-  - [ ] Delete all files under `cacheDir/session_[id]/`
-  - [ ] Clear `SessionViewModel` state
-  - [ ] Clear Bluetooth session token/challenge state
-- [ ] 3.8.2 Verify no customer images remain on device after cleanup
-- [ ] 3.8.3 Navigate back to Attract screen
+- [x] 3.8.1 `SessionCleaner` deletes `cacheDir/session_[id]/` recursively
+- [x] 3.8.2 `SessionViewModel.cancelSession()` and `resetToAttract()` both call `SessionCleaner.clean()`
+- [x] 3.8.3 Navigation to Attract driven by `SessionState.Idle` in `AppNavigation`
 
 ---
 

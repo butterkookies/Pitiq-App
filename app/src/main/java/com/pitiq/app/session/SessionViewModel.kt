@@ -2,6 +2,7 @@ package com.pitiq.app.session
 
 import androidx.lifecycle.ViewModel
 import com.pitiq.app.data.local.prefs.SecurePreferences
+import com.pitiq.app.session.SessionCleaner
 import com.pitiq.app.domain.model.CapturedPhoto
 import com.pitiq.app.domain.model.Layout
 import com.pitiq.app.domain.model.Session
@@ -18,6 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SessionViewModel @Inject constructor(
     private val securePreferences: SecurePreferences,
+    private val sessionCleaner: SessionCleaner,
 ) : ViewModel() {
 
     private val _sessionState = MutableStateFlow<SessionState>(SessionState.Idle)
@@ -134,11 +136,13 @@ class SessionViewModel @Inject constructor(
     }
 
     fun cancelSession() {
+        _session.value?.sessionId?.let { sessionCleaner.clean(it) }
         _session.value = null
         _sessionState.value = SessionState.Idle
     }
 
     fun resetToAttract() {
+        _session.value?.sessionId?.let { sessionCleaner.clean(it) }
         _session.value = null
         _sessionState.value = SessionState.Idle
     }

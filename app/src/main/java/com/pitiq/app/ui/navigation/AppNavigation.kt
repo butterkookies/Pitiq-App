@@ -36,6 +36,7 @@ fun AppNavigation(
     }
 
     val sessionState by sessionViewModel.sessionState.collectAsState()
+    val session by sessionViewModel.session.collectAsState()
 
     // Drive navigation from SessionState so screens never navigate independently.
     LaunchedEffect(sessionState) {
@@ -62,6 +63,8 @@ fun AppNavigation(
         }
         composable(Screen.Payment.route) {
             PaymentScreen(
+                onPaymentComplete = { sessionViewModel.onPaymentComplete() },
+                onCoinInserted = { total -> sessionViewModel.onCoinInserted(total) },
                 onCancel = { sessionViewModel.cancelSession() },
             )
         }
@@ -71,35 +74,47 @@ fun AppNavigation(
             )
         }
         composable(Screen.PhotoCapture.route) {
-            val state = sessionState as? SessionState.PhotoCapture
+            val state = sessionState as? SessionState.PhotoCapture ?: return@composable
             PhotoCaptureScreen(
-                isRetake = state?.isRetake == true,
+                sessionId = state.sessionId,
+                layout = state.layout,
+                currentSlot = state.currentSlot,
+                isRetake = state.isRetake,
                 onSlotCaptured = { photo -> sessionViewModel.onSlotCaptured(photo) },
                 onRetakeComplete = { photo -> sessionViewModel.onRetakeComplete(photo) },
             )
         }
         composable(Screen.Edit.route) {
+            val state = sessionState as? SessionState.Edit ?: return@composable
             EditScreen(
+                sessionId = (session?.sessionId) ?: return@composable,
+                layout = state.layout,
+                captures = state.captures,
+                retakeUsed = state.retakeUsed,
                 onPrintRequested = { sessionViewModel.onPrintRequested() },
                 onRetakeRequested = { slot -> sessionViewModel.onRetakeRequested(slot) },
             )
         }
         composable(Screen.Print.route) {
+            val state = sessionState as? SessionState.Print ?: return@composable
             PrintScreen(
+                sessionId = state.sessionId,
                 onPrintSuccess = { sessionViewModel.onPrintSuccess() },
                 onPrintFailed = { error -> sessionViewModel.onPrintFailed(error) },
             )
         }
         composable(Screen.Upload.route) {
+            val currentSession = session ?: return@composable
             UploadScreen(
+                session = currentSession,
                 onUploadComplete = { url -> sessionViewModel.onUploadComplete(url) },
                 onUploadFailed = { error -> sessionViewModel.onUploadFailed(error) },
             )
         }
         composable(Screen.QRShare.route) {
-            val state = sessionState as? SessionState.QRShare
+            val state = sessionState as? SessionState.QRShare ?: return@composable
             QRShareScreen(
-                shareUrl = state?.shareUrl.orEmpty(),
+                shareUrl = state.shareUrl,
                 onExpired = { sessionViewModel.resetToAttract() },
             )
         }

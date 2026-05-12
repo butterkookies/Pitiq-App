@@ -26,21 +26,27 @@ import javax.inject.Provider;
 public final class SessionViewModel_Factory implements Factory<SessionViewModel> {
   private final Provider<SecurePreferences> securePreferencesProvider;
 
-  public SessionViewModel_Factory(Provider<SecurePreferences> securePreferencesProvider) {
+  private final Provider<SessionCleaner> sessionCleanerProvider;
+
+  public SessionViewModel_Factory(Provider<SecurePreferences> securePreferencesProvider,
+      Provider<SessionCleaner> sessionCleanerProvider) {
     this.securePreferencesProvider = securePreferencesProvider;
+    this.sessionCleanerProvider = sessionCleanerProvider;
   }
 
   @Override
   public SessionViewModel get() {
-    return newInstance(securePreferencesProvider.get());
+    return newInstance(securePreferencesProvider.get(), sessionCleanerProvider.get());
   }
 
   public static SessionViewModel_Factory create(
-      Provider<SecurePreferences> securePreferencesProvider) {
-    return new SessionViewModel_Factory(securePreferencesProvider);
+      Provider<SecurePreferences> securePreferencesProvider,
+      Provider<SessionCleaner> sessionCleanerProvider) {
+    return new SessionViewModel_Factory(securePreferencesProvider, sessionCleanerProvider);
   }
 
-  public static SessionViewModel newInstance(SecurePreferences securePreferences) {
-    return new SessionViewModel(securePreferences);
+  public static SessionViewModel newInstance(SecurePreferences securePreferences,
+      SessionCleaner sessionCleaner) {
+    return new SessionViewModel(securePreferences, sessionCleaner);
   }
 }

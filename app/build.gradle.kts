@@ -28,6 +28,12 @@ android {
         versionName = "0.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Supabase config — set via environment or local.properties before Phase 4 backend setup.
+        val supabaseUrl = System.getenv("SUPABASE_URL") ?: "https://placeholder.supabase.co"
+        val supabaseKey = System.getenv("SUPABASE_ANON_KEY") ?: "placeholder-anon-key"
+        buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"$supabaseKey\"")
     }
 
     signingConfigs {
@@ -72,6 +78,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     packaging {

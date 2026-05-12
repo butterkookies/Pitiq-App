@@ -3,6 +3,7 @@ package com.pitiq.app.di
 import android.content.Context
 import androidx.room.Room
 import com.pitiq.app.data.local.db.PitiqDatabase
+import com.pitiq.app.data.local.db.dao.LayoutDao
 import com.pitiq.app.data.local.db.dao.UploadQueueDao
 import dagger.Module
 import dagger.Provides
@@ -24,4 +25,7 @@ object DatabaseModule {
 
     @Provides
     fun provideUploadQueueDao(db: PitiqDatabase): UploadQueueDao = db.uploadQueueDao()
+
+    @Provides
+    fun provideLayoutDao(db: PitiqDatabase): LayoutDao = db.layoutDao()
 }

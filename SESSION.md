@@ -220,3 +220,42 @@
 **Files created:** `hardware/bluetooth/BluetoothState.kt`, `hardware/bluetooth/BluetoothMessage.kt`, `hardware/bluetooth/HmacVerifier.kt`, `hardware/bluetooth/BluetoothManager.kt`, `hardware/bluetooth/CoinAcceptorRepository.kt`, `hardware/printer/PrintResult.kt`, `hardware/printer/PrinterManager.kt`, `ui/screen/attract/OperatorExitDialog.kt`, `app/src/test/.../HmacVerifierTest.kt`
 
 **Files modified:** `hardware/printer/UsbPermissionActivity.kt`, `data/local/prefs/SecurePreferences.kt` (added `bluetoothDeviceAddress`), `kiosk/KioskViewModel.kt` (added `verifyPinAndExit`), `ui/screen/attract/AttractScreen.kt` (long-press exit trigger), `ui/navigation/AppNavigation.kt` (wired exit callback), `ROADMAP.md`
+
+---
+
+## Session 8 — 2026-05-13
+
+**Topic:** Phase 3 — Session Flow Screens (all 8 screens + supporting infrastructure)
+
+**Decisions made:**
+
+| # | Issue | Decision |
+|---|-------|----------|
+| 47 | GIF encoder | No suitable pure-Kotlin/Java GIF encoder on Maven Central without NDK or stale libraries. Wrote a bespoke `GifEncoder.kt` (~130 lines): GIF89a, LZW-compressed, fixed 256-color palette (6×6×6 RGB cube + 40 grayscale steps). Portable, no external dependency. |
+| 48 | Color palette for GIF | Median-cut (NeuQuant) skipped in favour of a fixed 6×6×6 cube (216 colors) + 40 grayscale entries. Total = 256. Simpler, fast, good enough for photobooth output. Can be upgraded in Phase 7 if quality is insufficient. |
+| 49 | Composite render pipeline | `EditViewModel.requestPrint()` calls `MediaProcessor.renderColorPng()` (1152×variable, 3× thermal) before navigating to Print. `PrintViewModel.startPrint()` calls `MediaProcessor.renderThermalPng()` (384px grayscale) for the upload copy. `PrinterManager` does its own internal 1-bit conversion. |
+| 50 | Canvas bitmap drawing in Compose | `DrawScope.drawContext.canvas.nativeCanvas` is `@InternalComposeApi`. Used `withTransform { clipRect + translate + scale } → drawImage(imageBitmap)` instead. Flip achieved with negative `scaleX` + pre-translate to keep image on-screen. |
+| 51 | Slot layout geometry | Strip width: 384px thermal / 1152px color (3×). Height per layout: 2-slot = 576px, 4-slot = 1152px, 6-slot = 768px (2-column grid). Defined in `Layout.canvasHeight()` and `Layout.slotRects()` extension functions in `MediaProcessor.kt`. |
+| 52 | Default layouts | Three hardcoded layouts in `LayoutRepository.defaults` (no assets needed): "Classic Strip" (2-slot), "Photo Strip" (4-slot), "Memory Grid" (6-slot). `frameAssetPath` and `previewImagePath` are empty strings until real artwork is created. Layout gallery shows procedural slot-grid previews. |
+| 53 | Supabase client DI | `SupabaseModule` reads `SUPABASE_URL` and `SUPABASE_ANON_KEY` from `BuildConfig` (generated via env vars in `build.gradle.kts`). Placeholder values baked in; upload fails gracefully → offline queue until Phase 4 sets up the real backend. |
+| 54 | Offline upload fallback | `UploadViewModel`: on any Supabase exception, queues to Room `UploadQueueDao`, emits `UploadUiState.Queued`. `AppNavigation` forwards `offline://[sessionId]` as the `shareUrl` so QR screen still advances (shows no scannable code for offline sessions). WorkManager retry deferred to Phase 4. |
+| 55 | Room DB migration | Bumped `PitiqDatabase` version 1→2 (added `layout_cache` table for `LayoutEntity`). Kept `fallbackToDestructiveMigration` — dev phase, no production data. |
+| 56 | `LocalLifecycleOwner` deprecation | `PhotoCaptureScreen` uses `LocalLifecycleOwner.current` for CameraX binding. This is deprecated in favour of `androidx.lifecycle.compose.LocalLifecycleOwner`. Left as-is for now (warning-only, not an error); will migrate when `lifecycle-runtime-compose` is added to the version catalog in Phase 4. |
+| 57 | Payment threshold | Threshold is `coinTotal >= 40` (integer ₱), consistent with `Session.coinsInserted` comment and `CoinAcceptorRepository` using `amountPeso`. Roadmap item 3.2.5 previously said "4000 centavos" — clarified as integer ₱ throughout. |
+
+**Phase 3 items completed:**
+
+- 3.1 Attract Screen — pulsing ring + logo animation, "Out of Service" red overlay, 10s printer poll, tap-to-start
+- 3.2 Payment Screen — coin progress bar with ₱10 step dots, animated fill, 90s idle timeout, BT reconnecting overlay
+- 3.3 Layout Selection — `LayoutRepository` (defaults + Room merge), `LazyRow` card gallery, procedural slot-grid previews, confirm button
+- 3.4 Photo Capture — CameraX front camera, 10-frame burst at 1fps, 3-2-1 countdown overlay, files to `cacheDir/session_[id]/slot_[n]/`
+- 3.5 Edit Screen — Compose Canvas, tap-to-select, drag/zoom/flip, retake with timer pause, text-field dialogs, 90s countdown with auto-print
+- 3.6 Print Screen — `MediaProcessor.renderColorPng()` + `renderThermalPng()`, `PrinterManager.print()`, failure message + "Try Again" retry
+- 3.7 Upload & QR — `MediaProcessor.assembleGif()`, Supabase upload with offline fallback, ZXing QR code, 60s countdown
+- 3.8 Session Reset — `SessionCleaner` deletes `cacheDir/session_[id]/` on `cancelSession()` and `resetToAttract()`
+
+**Build result:** `BUILD SUCCESSFUL` — `compileDebugKotlin` clean. 1 deprecation warning (`LocalLifecycleOwner`).
+
+**Files created:** `data/local/db/entity/LayoutEntity.kt`, `data/local/db/dao/LayoutDao.kt`, `data/repository/LayoutRepository.kt`, `session/SessionCleaner.kt`, `hardware/media/GifEncoder.kt`, `hardware/media/MediaProcessor.kt`, `di/SupabaseModule.kt`, `ui/screen/attract/AttractViewModel.kt`, `ui/screen/payment/PaymentViewModel.kt`, `ui/screen/layout/LayoutSelectionViewModel.kt`, `ui/screen/edit/EditViewModel.kt`, `ui/screen/print/PrintViewModel.kt`, `ui/screen/upload/UploadViewModel.kt`, `ui/screen/qrshare/QRShareViewModel.kt`
+
+**Files modified:** `data/local/db/PitiqDatabase.kt` (v2 + LayoutDao), `di/DatabaseModule.kt` (LayoutDao provider), `session/SessionViewModel.kt` (SessionCleaner injection), `ui/navigation/AppNavigation.kt` (state data passed to screens), `ui/screen/attract/AttractScreen.kt`, `ui/screen/payment/PaymentScreen.kt`, `ui/screen/layout/LayoutSelectionScreen.kt`, `ui/screen/capture/PhotoCaptureScreen.kt`, `ui/screen/edit/EditScreen.kt`, `ui/screen/print/PrintScreen.kt`, `ui/screen/upload/UploadScreen.kt`, `ui/screen/qrshare/QRShareScreen.kt`, `app/build.gradle.kts` (buildConfig=true + Supabase BuildConfig fields), `ROADMAP.md`, `SESSION.md`
