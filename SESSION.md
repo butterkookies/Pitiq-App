@@ -45,3 +45,55 @@
 | 20 | Tablet UI scaling | Minimum touch target 48dp on all interactive elements. Adaptive rules per screen: layout selection uses 2-column grid on tablets, camera/edit canvas scale proportionally, QR code larger for scan distance. |
 
 **Files modified:** `ROADMAP.md`, `SESSION.md`
+
+---
+
+## Session 3 — 2026-05-12
+
+**Topic:** Repository initialization and README creation
+
+**Decisions made:**
+
+| # | Issue | Decision |
+|---|-------|----------|
+| 21 | Git repository | Initialized local git repo in `Pitiq Mobile/`. Remote set to `https://github.com/butterkookies/Pitiq-App.git`. Initial commit pushed with `PROMPT.md`, `ROADMAP.md`, `SESSION.md`. |
+| 22 | README | Created `README.md` from `PROMPT.md` and `ROADMAP.md` content. Covers: project overview, tech stack, session flow, architecture, hardware, Supabase backend, Vercel share page, security, operator features, phase summary, requirements, and notes. |
+
+**Files modified:** `README.md`, `SESSION.md`
+
+---
+
+## Session 4 — 2026-05-12
+
+**Topic:** Phase 0 — Android project scaffolding
+
+**Decisions made:**
+
+| # | Issue | Decision |
+|---|-------|----------|
+| 23 | AGP version | Used AGP 8.9.0 (conservative pick relative to Studio 2025.3.1's last stable 9.0.0). Gradle 8.14, Kotlin 2.1.0, KSP 2.1.0-1.0.29. |
+| 24 | compileSdk / targetSdk | compileSdk=36 (only platform installed). targetSdk=35. minSdk=23 as roadmap specifies. |
+| 25 | JAVA_HOME for Gradle | System Java 25 causes Gradle errors. Always use Android Studio JBR (Java 21): `$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"`. |
+| 26 | Gradle wrapper | Generated via installed Gradle 8.14 binary with JBR. JAR and scripts committed. |
+| 27 | Navigation approach | SessionState sealed class drives all navigation via `LaunchedEffect` in `AppNavigation`. Screens never navigate themselves — avoids split brain between nav stack and session state. |
+| 28 | QR Share screen | Separated into its own composable `QRShareScreen.kt` even though it's a stub; the NavHost has an explicit `composable(Screen.QRShare.route)` entry that reads `shareUrl` from current `SessionState`. |
+| 29 | Launcher icons | Adaptive icons in `mipmap-anydpi-v26`; PNG fallbacks in all density folders generated via PowerShell `System.Drawing`. |
+
+**Phase 0 items completed:**
+- 0.1.1–0.1.6 (project created, SDK configured, applicationId set, dependencies declared, Hilt configured, ProGuard rules written)
+- 0.2.1 Package structure: `ui/`, `domain/`, `data/`, `hardware/`, `kiosk/`, `session/`, `di/`
+- 0.2.2 Navigation graph with all 9 screens (Attract, OperatorSetup, Payment, LayoutSelection, PhotoCapture, Edit, Print, Upload, QRShare)
+- 0.2.3 `SessionState` sealed class with all session phases
+- 0.2.4 `SessionViewModel` with full state machine
+- 0.2.5 `Session`, `Layout`, `CapturedPhoto`, `TextField`, `UploadStatus` domain models
+- 0.3.1 Room database (`PitiqDatabase`)
+- 0.3.2 `SessionEntity` (maps to `upload_queue` table)
+- 0.3.3 `UploadQueueDao`
+- 0.3.4 `SecurePreferences` (EncryptedSharedPreferences wrapper for `location_id`, PIN, BT secret)
+
+**Phase 0 items remaining:**
+- 0.1.7 Git `.gitignore` created; remote already exists — need to push
+- 0.2.6–0.2.8 `WindowSizeClass` integration + adaptive layout rules (deferred to Phase 3 screen implementations)
+- 0.4.1–0.4.3 Build variants, APK signing, Makefile (deferred)
+
+**Files created:** `settings.gradle.kts`, `build.gradle.kts`, `gradle/libs.versions.toml`, `gradle.properties`, `app/build.gradle.kts`, `app/proguard-rules.pro`, `gradlew`, `gradlew.bat`, `gradle/wrapper/*`, `.gitignore`, `AndroidManifest.xml`, all resource XMLs, all Kotlin source files listed above, `SESSION.md`

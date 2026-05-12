@@ -1,0 +1,26 @@
+# Android
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+
+# Signing — never commit keystore files
+*.jks
+*.keystore
+keystore.properties
+
+# Environment / secrets
+local.properties
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

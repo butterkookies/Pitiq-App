@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    VID/PID must be confirmed against the physical printer before Phase 2.2.
+    Common 58mm ESC/POS thermal printer VID: 0x0456 (Epson-compatible).
+    Replace with actual values from `adb shell lsusb` when printer is connected.
+-->
+<resources>
+    <usb-device vendor-id="0x0456" />
+</resources>

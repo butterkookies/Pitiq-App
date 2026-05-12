@@ -1,0 +1,82 @@
+com.pitiq.app-ui-geometry-release-0 C:\Users\user\.gradle\caches\8.14\transforms\00e83d45e2dab8df6404a605185e57f2\transformed\ui-geometry-release\res
+com.pitiq.app-runtime-saveable-release-1 C:\Users\user\.gradle\caches\8.14\transforms\089580c43c9e4065642a74a929f62a76\transformed\runtime-saveable-release\res
+com.pitiq.app-core-ktx-1.13.1-2 C:\Users\user\.gradle\caches\8.14\transforms\0a1d56fa229a4646b9572e16a6a3ce38\transformed\core-ktx-1.13.1\res
+com.pitiq.app-material-release-3 C:\Users\user\.gradle\caches\8.14\transforms\0a6780a4c38f947ae43ab7a915fcde56\transformed\material-release\res
+com.pitiq.app-camera-view-1.4.1-4 C:\Users\user\.gradle\caches\8.14\transforms\0d2a3ae58f72fcabd37b5019142aa554\transformed\camera-view-1.4.1\res
+com.pitiq.app-material-ripple-release-5 C:\Users\user\.gradle\caches\8.14\transforms\105f63e2773ee9c8f5afcd824455b9da\transformed\material-ripple-release\res
+com.pitiq.app-activity-ktx-1.10.1-6 C:\Users\user\.gradle\caches\8.14\transforms\211de7aba9e3aa2e52bfec81ef8f5332\transformed\activity-ktx-1.10.1\res
+com.pitiq.app-navigation-common-ktx-2.8.9-7 C:\Users\user\.gradle\caches\8.14\transforms\213407194fb65d6147a23d19b35efd96\transformed\navigation-common-ktx-2.8.9\res
+com.pitiq.app-camera-core-1.4.1-8 C:\Users\user\.gradle\caches\8.14\transforms\24ed5548e27847b4279e112f7c7a97f6\transformed\camera-core-1.4.1\res
+com.pitiq.app-material3-release-9 C:\Users\user\.gradle\caches\8.14\transforms\284b4d94114672d5e0aa39139b7ae39d\transformed\material3-release\res
+com.pitiq.app-lifecycle-runtime-ktx-release-10 C:\Users\user\.gradle\caches\8.14\transforms\2dd406c245c20f266e2d97e8d9877f34\transformed\lifecycle-runtime-ktx-release\res
+com.pitiq.app-ui-graphics-release-11 C:\Users\user\.gradle\caches\8.14\transforms\305c73276513894e21f77b0cb0d64944\transformed\ui-graphics-release\res
+com.pitiq.app-window-1.0.0-12 C:\Users\user\.gradle\caches\8.14\transforms\33cf470d207838c56e89086eeabeec5e\transformed\window-1.0.0\res
+com.pitiq.app-lifecycle-viewmodel-release-13 C:\Users\user\.gradle\caches\8.14\transforms\3490762db35f1799c079d10df9aab9cc\transformed\lifecycle-viewmodel-release\res
+com.pitiq.app-camera-video-1.4.1-14 C:\Users\user\.gradle\caches\8.14\transforms\364be735503ed92496404b5b0ee81885\transformed\camera-video-1.4.1\res
+com.pitiq.app-ui-tooling-release-15 C:\Users\user\.gradle\caches\8.14\transforms\3a1f5470abf196751c20cea69e6b6acc\transformed\ui-tooling-release\res
+com.pitiq.app-ui-unit-release-16 C:\Users\user\.gradle\caches\8.14\transforms\3f45b2d6f23a8733fbbed5851e79bcc9\transformed\ui-unit-release\res
+com.pitiq.app-appcompat-resources-1.1.0-17 C:\Users\user\.gradle\caches\8.14\transforms\428cfa7063ec8011343a1b90c7512ab0\transformed\appcompat-resources-1.1.0\res
+com.pitiq.app-animation-release-18 C:\Users\user\.gradle\caches\8.14\transforms\46ac791e1254ae8ff39c1a24ee035377\transformed\animation-release\res
+com.pitiq.app-camera-lifecycle-1.4.1-19 C:\Users\user\.gradle\caches\8.14\transforms\46e89fcd5e7b08fb9b66086997252652\transformed\camera-lifecycle-1.4.1\res
+com.pitiq.app-profileinstaller-1.4.0-20 C:\Users\user\.gradle\caches\8.14\transforms\4760a632553f63c6eb5a8d69ec486ba2\transformed\profileinstaller-1.4.0\res
+com.pitiq.app-core-runtime-2.2.0-21 C:\Users\user\.gradle\caches\8.14\transforms\47fb646e8f950d341c2404dabdc1773e\transformed\core-runtime-2.2.0\res
+com.pitiq.app-lifecycle-viewmodel-ktx-2.8.7-22 C:\Users\user\.gradle\caches\8.14\transforms\4be7b6e8481c2721ea2479335185d577\transformed\lifecycle-viewmodel-ktx-2.8.7\res
+com.pitiq.app-hilt-navigation-compose-1.2.0-23 C:\Users\user\.gradle\caches\8.14\transforms\4d6f012c0127e2fb53c728b449c85b67\transformed\hilt-navigation-compose-1.2.0\res
+com.pitiq.app-ui-release-24 C:\Users\user\.gradle\caches\8.14\transforms\5044491af1e1556e00df94afa2d4c8b9\transformed\ui-release\res
+com.pitiq.app-hilt-navigation-1.2.0-25 C:\Users\user\.gradle\caches\8.14\transforms\555af88725d53ba374d341d5f2f5bc71\transformed\hilt-navigation-1.2.0\res
+com.pitiq.app-graphics-path-1.0.1-26 C:\Users\user\.gradle\caches\8.14\transforms\580fe55f5c5aa18cecf5b00365891503\transformed\graphics-path-1.0.1\res
+com.pitiq.app-activity-compose-1.10.1-27 C:\Users\user\.gradle\caches\8.14\transforms\5923520dfea7ed001da1b5ddd62b8752\transformed\activity-compose-1.10.1\res
+com.pitiq.app-material3-window-size-class-release-28 C:\Users\user\.gradle\caches\8.14\transforms\5de88b76969f14dcab770a64ecca3af6\transformed\material3-window-size-class-release\res
+com.pitiq.app-activity-1.10.1-29 C:\Users\user\.gradle\caches\8.14\transforms\615d314f3bd70bdfcdd95501de6e9f5b\transformed\activity-1.10.1\res
+com.pitiq.app-navigation-runtime-2.8.9-30 C:\Users\user\.gradle\caches\8.14\transforms\61dd8101e42acf3d02bff614ecedda00\transformed\navigation-runtime-2.8.9\res
+com.pitiq.app-navigation-common-2.8.9-31 C:\Users\user\.gradle\caches\8.14\transforms\703e951d8c08e44a7c86e155181ff958\transformed\navigation-common-2.8.9\res
+com.pitiq.app-core-1.13.1-32 C:\Users\user\.gradle\caches\8.14\transforms\71bae7467c078076db167cdccc90821f\transformed\core-1.13.1\res
+com.pitiq.app-sqlite-framework-release-33 C:\Users\user\.gradle\caches\8.14\transforms\73c8bb7681beb48693212c42469a938f\transformed\sqlite-framework-release\res
+com.pitiq.app-sqlite-release-34 C:\Users\user\.gradle\caches\8.14\transforms\74caad233c5c241cee6862553c061153\transformed\sqlite-release\res
+com.pitiq.app-ui-util-release-35 C:\Users\user\.gradle\caches\8.14\transforms\789ed78680716c9a813de73c44c0f768\transformed\ui-util-release\res
+com.pitiq.app-lifecycle-process-2.8.7-36 C:\Users\user\.gradle\caches\8.14\transforms\7a18fbfa5c37d531337fe921f9bdc8e8\transformed\lifecycle-process-2.8.7\res
+com.pitiq.app-lifecycle-service-2.8.7-37 C:\Users\user\.gradle\caches\8.14\transforms\7d83819c9d1a2987a0e8d066cb90666a\transformed\lifecycle-service-2.8.7\res
+com.pitiq.app-hilt-work-1.2.0-38 C:\Users\user\.gradle\caches\8.14\transforms\833b6085898ce71c2857be9951682c01\transformed\hilt-work-1.2.0\res
+com.pitiq.app-savedstate-ktx-1.2.1-39 C:\Users\user\.gradle\caches\8.14\transforms\84e72899c101be418bac42447f7d7067\transformed\savedstate-ktx-1.2.1\res
+com.pitiq.app-annotation-experimental-1.4.1-40 C:\Users\user\.gradle\caches\8.14\transforms\868471fa67690cadc585066d54184bf7\transformed\annotation-experimental-1.4.1\res
+com.pitiq.app-foundation-layout-release-41 C:\Users\user\.gradle\caches\8.14\transforms\876e2d08f3086e1b3b8d034f09e972f1\transformed\foundation-layout-release\res
+com.pitiq.app-work-runtime-2.10.1-42 C:\Users\user\.gradle\caches\8.14\transforms\8d9644526b67095790e4ffc292f25cdd\transformed\work-runtime-2.10.1\res
+com.pitiq.app-security-crypto-1.1.0-alpha06-43 C:\Users\user\.gradle\caches\8.14\transforms\8da798dfb2da6be46366afe2bcd3f7fd\transformed\security-crypto-1.1.0-alpha06\res
+com.pitiq.app-ui-test-manifest-1.7.6-44 C:\Users\user\.gradle\caches\8.14\transforms\928ab0449e549121dcb53e1626f4346c\transformed\ui-test-manifest-1.7.6\res
+com.pitiq.app-room-runtime-release-45 C:\Users\user\.gradle\caches\8.14\transforms\92b6875a51fb4d20fed0649c2bc55a1d\transformed\room-runtime-release\res
+com.pitiq.app-ui-tooling-preview-release-46 C:\Users\user\.gradle\caches\8.14\transforms\92d7c6a60e4d5dc262ab0a4f9aef0a5f\transformed\ui-tooling-preview-release\res
+com.pitiq.app-savedstate-1.2.1-47 C:\Users\user\.gradle\caches\8.14\transforms\961583a82701461f1433bfb170ba1438\transformed\savedstate-1.2.1\res
+com.pitiq.app-navigation-runtime-ktx-2.8.9-48 C:\Users\user\.gradle\caches\8.14\transforms\9628cf84f0b4a6a62f845a0e803424ce\transformed\navigation-runtime-ktx-2.8.9\res
+com.pitiq.app-lifecycle-livedata-core-ktx-2.8.7-49 C:\Users\user\.gradle\caches\8.14\transforms\a644797ce079d21dbe5724c317cb3a38\transformed\lifecycle-livedata-core-ktx-2.8.7\res
+com.pitiq.app-camera-camera2-1.4.1-50 C:\Users\user\.gradle\caches\8.14\transforms\a7cd3fa1428db64ba8b65ce95ba4a423\transformed\camera-camera2-1.4.1\res
+com.pitiq.app-navigation-compose-2.8.9-51 C:\Users\user\.gradle\caches\8.14\transforms\a9a08cc4e786c5e9e184668270ca5eee\transformed\navigation-compose-2.8.9\res
+com.pitiq.app-ui-text-release-52 C:\Users\user\.gradle\caches\8.14\transforms\ab45f4eb7ee8f1d3e649a5d36b7d9b65\transformed\ui-text-release\res
+com.pitiq.app-startup-runtime-1.2.0-53 C:\Users\user\.gradle\caches\8.14\transforms\ace45583450a723ec42d1aad30eb10ee\transformed\startup-runtime-1.2.0\res
+com.pitiq.app-tracing-1.2.0-54 C:\Users\user\.gradle\caches\8.14\transforms\adf1bcc96b8baa256c7d39baa2e96e2a\transformed\tracing-1.2.0\res
+com.pitiq.app-work-runtime-ktx-2.10.1-55 C:\Users\user\.gradle\caches\8.14\transforms\afc595060055ff3c90453a7abefa94e7\transformed\work-runtime-ktx-2.10.1\res
+com.pitiq.app-core-viewtree-1.0.0-56 C:\Users\user\.gradle\caches\8.14\transforms\b00418cc50d9a42ff7aa751ee69a8b9a\transformed\core-viewtree-1.0.0\res
+com.pitiq.app-foundation-release-57 C:\Users\user\.gradle\caches\8.14\transforms\b0cdabf44c891b2811ebf862faf27303\transformed\foundation-release\res
+com.pitiq.app-browser-1.8.0-58 C:\Users\user\.gradle\caches\8.14\transforms\b954bfc8d6c2f34dc6346bb18d625c66\transformed\browser-1.8.0\res
+com.pitiq.app-lifecycle-runtime-release-59 C:\Users\user\.gradle\caches\8.14\transforms\ba03238e4eb32c41c460125868d74c9a\transformed\lifecycle-runtime-release\res
+com.pitiq.app-lifecycle-livedata-2.8.7-60 C:\Users\user\.gradle\caches\8.14\transforms\bb6f849e7318647b40db4f36a4c2b8de\transformed\lifecycle-livedata-2.8.7\res
+com.pitiq.app-material-icons-core-release-61 C:\Users\user\.gradle\caches\8.14\transforms\c3c04c64df8dec939af6ffa4dc427b59\transformed\material-icons-core-release\res
+com.pitiq.app-room-ktx-2.7.1-62 C:\Users\user\.gradle\caches\8.14\transforms\c515996181d0d4d734890981cfc5b741\transformed\room-ktx-2.7.1\res
+com.pitiq.app-animation-core-release-63 C:\Users\user\.gradle\caches\8.14\transforms\d1a456db9011fbe353a60fc07af0c74f\transformed\animation-core-release\res
+com.pitiq.app-fragment-1.5.1-64 C:\Users\user\.gradle\caches\8.14\transforms\d36b8032c68ca034c96a8badf2359fb6\transformed\fragment-1.5.1\res
+com.pitiq.app-runtime-release-65 C:\Users\user\.gradle\caches\8.14\transforms\d5f9fb8e3cea7270db339631d725d61c\transformed\runtime-release\res
+com.pitiq.app-tracing-ktx-1.2.0-66 C:\Users\user\.gradle\caches\8.14\transforms\d82d0d3d64ca09e6b103a4dd7dd56bdb\transformed\tracing-ktx-1.2.0\res
+com.pitiq.app-appcompat-1.1.0-67 C:\Users\user\.gradle\caches\8.14\transforms\dad46d7dbb1db30a2484271eee81c6dc\transformed\appcompat-1.1.0\res
+com.pitiq.app-lifecycle-viewmodel-savedstate-2.8.7-68 C:\Users\user\.gradle\caches\8.14\transforms\e7cf3e76695a1a9ccf9df538ffbbe187\transformed\lifecycle-viewmodel-savedstate-2.8.7\res
+com.pitiq.app-ui-tooling-data-release-69 C:\Users\user\.gradle\caches\8.14\transforms\e81fe523e3e73a189b408476d9156866\transformed\ui-tooling-data-release\res
+com.pitiq.app-emoji2-1.3.0-70 C:\Users\user\.gradle\caches\8.14\transforms\ea64b60ef128e27b3894fcbc593386eb\transformed\emoji2-1.3.0\res
+com.pitiq.app-customview-poolingcontainer-1.0.0-71 C:\Users\user\.gradle\caches\8.14\transforms\eb3d122b6f3cc00cde856b3e5335ecf4\transformed\customview-poolingcontainer-1.0.0\res
+com.pitiq.app-lifecycle-runtime-compose-release-72 C:\Users\user\.gradle\caches\8.14\transforms\f01ac27b398a62de7e8b42f8fdb05d3b\transformed\lifecycle-runtime-compose-release\res
+com.pitiq.app-lifecycle-livedata-core-2.8.7-73 C:\Users\user\.gradle\caches\8.14\transforms\f6766a4a245a7caead8f6f7f87f3832c\transformed\lifecycle-livedata-core-2.8.7\res
+com.pitiq.app-lifecycle-viewmodel-compose-release-74 C:\Users\user\.gradle\caches\8.14\transforms\fcc856d84aafc9f0126d901180aabf6d\transformed\lifecycle-viewmodel-compose-release\res
+com.pitiq.app-pngs-75 C:\Users\user\Documents\ANDREI_FILES\DEVFILES\PROJECTS\Pitiq Mobile\app\build\generated\res\pngs\debug
+com.pitiq.app-resValues-76 C:\Users\user\Documents\ANDREI_FILES\DEVFILES\PROJECTS\Pitiq Mobile\app\build\generated\res\resValues\debug
+com.pitiq.app-packageDebugResources-77 C:\Users\user\Documents\ANDREI_FILES\DEVFILES\PROJECTS\Pitiq Mobile\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.pitiq.app-packageDebugResources-78 C:\Users\user\Documents\ANDREI_FILES\DEVFILES\PROJECTS\Pitiq Mobile\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.pitiq.app-debug-79 C:\Users\user\Documents\ANDREI_FILES\DEVFILES\PROJECTS\Pitiq Mobile\app\build\intermediates\merged_res\debug\mergeDebugResources
+com.pitiq.app-debug-80 C:\Users\user\Documents\ANDREI_FILES\DEVFILES\PROJECTS\Pitiq Mobile\app\src\debug\res
+com.pitiq.app-main-81 C:\Users\user\Documents\ANDREI_FILES\DEVFILES\PROJECTS\Pitiq Mobile\app\src\main\res

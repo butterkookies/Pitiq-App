@@ -5,7 +5,23 @@
       "Bash(Out-Null)",
       "PowerShell(New-Item *)",
       "Bash(rtk ls *)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "PowerShell(java *)",
+      "PowerShell(ls \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\build-tools\"; Write-Host \"---\"; ls \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\platforms\"; Write-Host \"---\"; ls \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\cmdline-tools\")",
+      "PowerShell(ls \"$env:LOCALAPPDATA\\\\Android\\\\Sdk\\\\cmdline-tools\\\\latest\\\\bin\")",
+      "PowerShell(ls \"$env:USERPROFILE\\\\.gradle\\\\wrapper\\\\dists\\\\gradle-8.14-all\"; $gradleDist = ls \"$env:USERPROFILE\\\\.gradle\\\\wrapper\\\\dists\\\\gradle-8.14-all\" -Recurse -Filter \"gradle-wrapper.jar\" -ErrorAction SilentlyContinue; $gradleDist)",
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(Test-Path *)",
+      "PowerShell(cd \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\plugins\\\\android\\\\lib\"; & \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\\\\bin\\\\jar.exe\" tf libagp-version.jar 2>&1 | Select-Object -First 10; Write-Host \"---\"; Add-Type -Assembly \"System.IO.Compression.FileSystem\"; $zip = [System.IO.Compression.ZipFile]::OpenRead\\(\"$env:ProgramFiles\\\\Android\\\\Android Studio\\\\plugins\\\\android\\\\lib\\\\libagp-version.jar\"\\); $zip.Entries | Select-Object -First 10 Name; $zip.Dispose\\(\\))",
+      "PowerShell(Add-Type -Assembly \"System.IO.Compression.FileSystem\"; $zip = [System.IO.Compression.ZipFile]::OpenRead\\(\"$env:ProgramFiles\\\\Android\\\\Android Studio\\\\plugins\\\\android\\\\lib\\\\libagp-version.jar\"\\); $entry = $zip.Entries | Where-Object Name -eq \"version.properties\"; $stream = $entry.Open\\(\\); $reader = New-Object System.IO.StreamReader\\($stream\\); $content = $reader.ReadToEnd\\(\\); $reader.Dispose\\(\\); $stream.Dispose\\(\\); $zip.Dispose\\(\\); $content)",
+      "PowerShell($gradleBin = \"C:\\\\Users\\\\user\\\\.gradle\\\\wrapper\\\\dists\\\\gradle-8.14-all\\\\c2qonpi39x1mddn7hk5gh9iqj\\\\gradle-8.14\\\\bin\\\\gradle.bat\"; $projectDir = \"C:\\\\Users\\\\user\\\\Documents\\\\ANDREI_FILES\\\\DEVFILES\\\\PROJECTS\\\\Pitiq Mobile\"; & $gradleBin --project-dir $projectDir wrapper --gradle-version=8.14 --distribution-type=bin 2>&1 | Select-Object -Last 20)",
+      "PowerShell($gradleBin = \"C:\\\\Users\\\\user\\\\.gradle\\\\wrapper\\\\dists\\\\gradle-8.14-all\\\\c2qonpi39x1mddn7hk5gh9iqj\\\\gradle-8.14\\\\bin\\\\gradle.bat\"; $projectDir = \"C:\\\\Users\\\\user\\\\Documents\\\\ANDREI_FILES\\\\DEVFILES\\\\PROJECTS\\\\Pitiq Mobile\"; $env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; & $gradleBin --project-dir $projectDir wrapper --gradle-version=8.14 --distribution-type=bin 2>&1 | Select-Object -Last 15)",
+      "PowerShell(ls \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\\\\bin\" | Select-Object Name | Format-Table; Write-Host \"---\"; & \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\\\\bin\\\\java.exe\" -version 2>&1)",
+      "PowerShell($projectDir = \"C:\\\\Users\\\\user\\\\Documents\\\\ANDREI_FILES\\\\DEVFILES\\\\PROJECTS\\\\Pitiq Mobile\"; $env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; & \"$projectDir\\\\gradlew.bat\" --project-dir $projectDir :app:compileDebugKotlin --no-daemon 2>&1 | Select-Object -Last 40)",
+      "PowerShell(Tee-Object *)",
+      "PowerShell($projectDir = \"C:\\\\Users\\\\user\\\\Documents\\\\ANDREI_FILES\\\\DEVFILES\\\\PROJECTS\\\\Pitiq Mobile\"; $env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; & \"$projectDir\\\\gradlew.bat\" --project-dir $projectDir clean :app:assembleDebug --no-daemon 2>&1 | Select-Object -Last 5)",
+      "PowerShell(Test-Path)",
+      "PowerShell(Get-Content *)"
     ]
   }
 }
