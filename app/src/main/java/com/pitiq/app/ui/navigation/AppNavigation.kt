@@ -57,6 +57,7 @@ fun AppNavigation(
         composable(Screen.Attract.route) {
             AttractScreen(
                 onTap = { sessionViewModel.initSession() },
+                onExitKiosk = { pin -> kioskViewModel.verifyPinAndExit(pin) },
             )
         }
         composable(Screen.Payment.route) {

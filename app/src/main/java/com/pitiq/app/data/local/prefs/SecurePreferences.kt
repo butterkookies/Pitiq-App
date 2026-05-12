@@ -37,6 +37,10 @@ class SecurePreferences @Inject constructor(
         get() = prefs.getString(KEY_BT_SHARED_SECRET, null)
         set(value) = prefs.edit().putString(KEY_BT_SHARED_SECRET, value).apply()
 
+    var bluetoothDeviceAddress: String?
+        get() = prefs.getString(KEY_BT_DEVICE_ADDRESS, null)
+        set(value) = prefs.edit().putString(KEY_BT_DEVICE_ADDRESS, value).apply()
+
     val isConfigured: Boolean
         get() = locationId != null && operatorPin != null
 
@@ -44,5 +48,6 @@ class SecurePreferences @Inject constructor(
         private const val KEY_LOCATION_ID = "location_id"
         private const val KEY_OPERATOR_PIN = "operator_pin"
         private const val KEY_BT_SHARED_SECRET = "bt_shared_secret"
+        private const val KEY_BT_DEVICE_ADDRESS = "bt_device_address"
     }
 }

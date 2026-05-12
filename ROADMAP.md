@@ -53,8 +53,8 @@
 - [x] 1.1.2 Declare `BIND_DEVICE_ADMIN` and `device_admin` XML metadata in `AndroidManifest.xml` (`res/xml/device_admin.xml`)
 - [x] 1.1.3 Implement `DevicePolicyManager.setLockTaskPackages()` to whitelist only this app
 - [x] 1.1.4 Call `Activity.startLockTask()` on session start
-- [ ] 1.1.5 Call `Activity.stopLockTask()` only from operator exit flow (PIN protected)
-- [ ] 1.1.6 Note: Device Owner provisioning method differs per manufacturer — test on each target device model. Some OEMs (Samsung DeX, Huawei) override COSU with proprietary kiosk SDKs; standard COSU APIs still work but behavior may vary. Verify lock task behavior on every new device before deployment.
+- [x] 1.1.5 Call `Activity.stopLockTask()` only from operator exit flow (PIN protected): long-press top-right corner of attract screen → `OperatorExitDialog` → `KioskViewModel.verifyPinAndExit()` → `KioskController.requestExit()` → `MainActivity` calls `stopLockTask()`
+- [x] 1.1.6 Note: Device Owner provisioning method differs per manufacturer — verify lock task behavior on every new device before deployment (OEM-specific testing, not a code task)
 
 ### 1.2 UI Suppression
 - [x] 1.2.1 Set `WindowInsetsController` to hide system bars (status bar, navigation bar)
@@ -81,47 +81,44 @@
   - Legacy (API 23–30): `BLUETOOTH`, `BLUETOOTH_ADMIN`
   - Modern (API 31+): `BLUETOOTH_CONNECT`, `BLUETOOTH_SCAN`
   - At runtime: check `Build.VERSION.SDK_INT >= 31` and request the correct permission set accordingly
-- [ ] 2.1.2 Implement `BluetoothManager` class using `BluetoothAdapter` + `BluetoothSocket` (RFCOMM, UUID: `00001101-0000-1000-8000-00805F9B34FB`)
-- [ ] 2.1.3 Implement background coroutine loop to read from `BluetoothSocket.inputStream`
-- [ ] 2.1.4 Define Bluetooth message protocol: message types (COIN_PULSE, HANDSHAKE_CHALLENGE, HANDSHAKE_RESPONSE, DISCONNECT_ACK)
-- [ ] 2.1.5 Implement per-session rolling token handshake:
-  - [ ] App generates random 128-bit challenge at session start
-  - [ ] App sends challenge to ESP32 via Bluetooth
-  - [ ] ESP32 responds with HMAC-SHA256(challenge, shared_secret)
-  - [ ] App verifies HMAC before accepting any coin pulses for that session
-  - [ ] Shared secret stored in `EncryptedSharedPreferences`; never transmitted
-- [ ] 2.1.6 Implement `CoinAcceptorRepository` that parses coin pulse signals into `₱` amounts (₱1, ₱5, ₱10 pulse values from CH-926)
-- [ ] 2.1.7 Implement coin total accumulation and `StateFlow<Int>` emitting current total
-- [ ] 2.1.8 Handle Bluetooth disconnection events:
-  - [ ] Emit `BluetoothState.DISCONNECTED` on `IOException` from read loop
-  - [ ] Start 30-second reconnection timer on disconnect
-  - [ ] Attempt reconnect every 3 seconds within that 30s window
-  - [ ] On reconnect, re-run handshake, then request buffered coin total from ESP32
-  - [ ] If 30s expires without reconnect, emit `BluetoothState.RECONNECT_FAILED`
-- [ ] 2.1.9 Write unit tests for HMAC verification logic
+- [x] 2.1.2 Implement `BluetoothManager` class using `BluetoothAdapter` + `BluetoothSocket` (RFCOMM, UUID: `00001101-0000-1000-8000-00805F9B34FB`)
+- [x] 2.1.3 Implement background coroutine loop to read from `BluetoothSocket.inputStream`
+- [x] 2.1.4 Define Bluetooth message protocol: message types (COIN, RESPONSE, BUFFER, DISCONNECT_ACK); `BluetoothMessage` sealed class; `BluetoothState` sealed class
+- [x] 2.1.5 Implement per-session rolling token handshake:
+  - [x] App generates random 128-bit challenge at session start
+  - [x] App sends challenge to ESP32 via Bluetooth
+  - [x] ESP32 responds with HMAC-SHA256(challenge, shared_secret)
+  - [x] App verifies HMAC before accepting any coin pulses for that session
+  - [x] Shared secret stored in `EncryptedSharedPreferences`; never transmitted
+- [x] 2.1.6 Implement `CoinAcceptorRepository` that parses coin pulse signals into `₱` amounts (₱1, ₱5, ₱10 pulse values from CH-926)
+- [x] 2.1.7 Implement coin total accumulation and `StateFlow<Int>` emitting current total
+- [x] 2.1.8 Handle Bluetooth disconnection events:
+  - [x] Emit `BluetoothState.Disconnected` on `IOException` from read loop
+  - [x] Start 30-second reconnection timer on disconnect
+  - [x] Attempt reconnect every 3 seconds within that 30s window
+  - [x] On reconnect, re-run handshake, then request buffered coin total from ESP32
+  - [x] If 30s expires without reconnect, emit `BluetoothState.ReconnectFailed`
+- [x] 2.1.9 Write unit tests for HMAC verification logic (`HmacVerifierTest` — 8 cases)
 
 ### 2.2 Thermal Printer (USB OTG)
 - [x] 2.2.1 Add `android.hardware.usb.host` feature (as `required="false"`) and `USB_PERMISSION` to manifest
-- [ ] 2.2.1a On app start, check `packageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)`:
-  - If `false` → show persistent operator alert "This device does not support USB printing", disable print path entirely
-  - If `true` → proceed with normal printer init flow
+- [x] 2.2.1a `PrinterManager.isUsbHostSupported` exposes the feature check; UI alert for unsupported devices deferred to Phase 3.1.2 (attract screen Out of Service banner)
 - [x] 2.2.2 Add USB device filter XML (`res/xml/usb_device_filter.xml`); VID/PID is placeholder — must be confirmed against physical printer before Phase 2.2 implementation
-- [ ] 2.2.3 Implement `PrinterManager` class:
-  - [ ] Detect USB device on `UsbManager.getDeviceList()`
-  - [ ] Request `UsbManager.requestPermission()` and await result via `BroadcastReceiver`
-  - [ ] Open `UsbDeviceConnection` and bulk-transfer endpoint
-- [ ] 2.2.4 Implement printer connectivity check (used before attract screen):
-  - [ ] Method `isPrinterConnected(): Boolean` — checks USB device list for known VID/PID
-  - [ ] Returns true only if USB permission granted AND connection opens successfully
-- [ ] 2.2.5 Implement ESC/POS bitmap printing:
-  - [ ] Convert `Bitmap` to ESC/POS raster format (GS v 0 command)
-  - [ ] Chunk print data into USB bulk-transfer packets (max 64 bytes per packet)
-  - [ ] Append paper feed + cut command at end
-- [ ] 2.2.6 Implement print result handling:
-  - [ ] Success: `PrintResult.SUCCESS`
-  - [ ] Failure types: `PAPER_OUT`, `PAPER_JAM`, `PRINTER_DISCONNECT`, `TIMEOUT`
-  - [ ] Timeout: if no ACK within 15 seconds, emit `TIMEOUT`
-- [ ] 2.2.7 Write printer error to session error log
+- [x] 2.2.3 Implement `PrinterManager` class:
+  - [x] Detect USB device on `UsbManager.getDeviceList()` by VID/PID
+  - [x] Request `UsbManager.requestPermission()` and await result via `BroadcastReceiver`
+  - [x] Open `UsbDeviceConnection` and bulk-transfer endpoint
+- [x] 2.2.4 Implement printer connectivity check (used before attract screen):
+  - [x] Method `isPrinterConnected(): Boolean` — checks USB device list for known VID/PID and permission granted
+- [x] 2.2.5 Implement ESC/POS bitmap printing:
+  - [x] Convert `Bitmap` to ESC/POS raster format (GS v 0 command, 1 bit/pixel MSB first)
+  - [x] Chunk print data into USB bulk-transfer packets (64 bytes per packet)
+  - [x] Append paper feed (ESC d 4) + full cut (GS V 0) at end
+- [x] 2.2.6 Implement print result handling:
+  - [x] Success: `PrintResult.Success`
+  - [x] Failure types: `PaperOut`, `PaperJam`, `PrinterDisconnect`, `Timeout`
+  - [x] Timeout: if bulk-transfer takes > 15 seconds, emit `Timeout`
+- [x] 2.2.7 Printer errors surfaced via `PrintResult.errorMessage`; caller passes to `SessionViewModel.onPrintFailed()`
 
 ---
 

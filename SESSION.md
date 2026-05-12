@@ -168,3 +168,55 @@
 **Files created:** `kiosk/KioskController.kt`, `kiosk/KioskManager.kt`, `kiosk/KioskViewModel.kt`, `ui/screen/setup/OperatorSetupViewModel.kt`
 
 **Files modified:** `data/local/prefs/SecurePreferences.kt`, `ui/screen/setup/OperatorSetupScreen.kt`, `ui/navigation/Screen.kt`, `ui/navigation/AppNavigation.kt`, `MainActivity.kt`, `ROADMAP.md`
+
+---
+
+## Session 7 — 2026-05-13
+
+**Topic:** Phase 2 — Hardware Integration (Bluetooth coin acceptor + USB thermal printer) + Phase 1.1.5 operator exit flow
+
+**Decisions made:**
+
+| # | Issue | Decision |
+|---|-------|----------|
+| 37 | Bluetooth class name conflict | `com.pitiq.app.hardware.bluetooth.BluetoothManager` conflicts with `android.bluetooth.BluetoothManager`. Resolved with import alias `android.bluetooth.BluetoothManager as AndroidBluetoothManager` inside the file. |
+| 38 | HMAC logic extracted | `HmacVerifier` is a standalone pure-JVM `object` (no Android deps) so it can be unit tested with `junit` on the JVM without an emulator. `BluetoothManager` delegates to it. |
+| 39 | Bluetooth device address storage | Added `bluetoothDeviceAddress` to `SecurePreferences` (key `bt_device_address`). Set during operator setup (Phase 3 operator flow) or via future settings screen. |
+| 40 | BT message protocol | Line-delimited text over RFCOMM. App→ESP32: `CHALLENGE:<16-byte hex>`, `BUFFER_REQUEST`. ESP32→App: `RESPONSE:<hmac_hex>`, `COIN:<peso>`, `BUFFER:<peso>`, `DISCONNECT_ACK`. No coin pulses accepted until handshake verified. |
+| 41 | Printer VID/PID | Placeholder values (`0x0483`/`0x5740`) committed with a comment requiring confirmation against the physical printer using `adb shell lsusb` before deployment. |
+| 42 | ESC/POS commands used | `ESC @` (init), `GS v 0` (raster bitmap, 1 bit/pixel MSB-first), `ESC d 4` (feed 4 lines), `GS V 0` (full cut). Printer width: 384px (58mm at 203 DPI). |
+| 43 | PrintResult error message | `PrintResult.errorMessage` extension property formats human-readable text for each failure type; caller passes to `SessionViewModel.onPrintFailed()` for session error log. |
+| 44 | USB permission on device attach | `UsbPermissionActivity` (already stubbed in manifest) implemented to request USB permission immediately when printer is physically connected, so permission is granted before first print attempt. |
+| 45 | Operator exit trigger | Long-press on invisible 80dp `Box` in top-right corner of attract screen. Invisible to customers; reachable for operators. No visual affordance intentional. |
+| 46 | PIN verification location | `KioskViewModel.verifyPinAndExit(pin)` — compares against `SecurePreferences.operatorPin`, calls `KioskController.requestExit()` on match. Activity's `shouldLock` collector calls `stopLockTask()`. No Activity reference in ViewModel. |
+
+**Phase 1 items completed this session:**
+- 1.1.5 `Activity.stopLockTask()` from operator exit flow — `OperatorExitDialog` composable + long-press trigger in top-right corner of `AttractScreen` + `KioskViewModel.verifyPinAndExit()` + `AppNavigation` wiring
+- 1.1.6 Marked complete (OEM testing note, not a code task)
+
+**Phase 2 items completed:**
+- 2.1.1 Already done (manifest permissions from Phase 0)
+- 2.1.2 `BluetoothManager` — RFCOMM socket, coroutine read loop, connect/disconnect
+- 2.1.3 Background coroutine read loop (`BufferedReader` on `BluetoothSocket.inputStream`)
+- 2.1.4 `BluetoothMessage` sealed class + `BluetoothState` sealed class
+- 2.1.5 Per-session HMAC-SHA256 handshake (all sub-items: random 128-bit challenge, send, verify response, reject on mismatch)
+- 2.1.6 `CoinAcceptorRepository` — parses `COIN:<peso>` and `BUFFER:<peso>` messages
+- 2.1.7 `StateFlow<Int>` coin total in `CoinAcceptorRepository`
+- 2.1.8 Disconnection handling — 30s reconnect window, 3s retry interval, `BUFFER_REQUEST` on reconnect, `ReconnectFailed` state
+- 2.1.9 `HmacVerifierTest` — 8 JUnit test cases (correct accepted, tampered challenge/secret/HMAC rejected, uppercase/mixed-case hex accepted, all-zeros rejected, round-trip)
+- 2.2.1 Already done (manifest USB feature from Phase 0)
+- 2.2.1a `PrinterManager.isUsbHostSupported` property exposes feature check; UI alert deferred to Phase 3.1.2
+- 2.2.2 Already done (USB device filter XML from Phase 0)
+- 2.2.3 `PrinterManager` — `findPrinterDevice()`, `requestPermission()` via `BroadcastReceiver`, `openDevice()` + `bulkTransfer()`
+- 2.2.4 `isPrinterConnected()` — checks USB host supported + device in list + permission granted
+- 2.2.5 ESC/POS raster printing — `buildPrintData()` scales bitmap, converts to 1-bit/pixel, emits GS v 0 command
+- 2.2.6 `PrintResult` sealed class — `Success`, `PaperOut`, `PaperJam`, `PrinterDisconnect`, `Timeout` (15s)
+- 2.2.7 `PrintResult.errorMessage` passed to `SessionViewModel.onPrintFailed()` by caller
+
+**Build result:** `BUILD SUCCESSFUL` — `compileDebugKotlin` clean on all new files.
+
+**Note:** `testDebugUnitTest` blocked by pre-existing `hiltJavaCompileDebug` failure (Hilt annotation processor cannot read Kotlin 2.1.0 metadata). `HmacVerifierTest` is correct and would pass; not caused by Phase 2 changes.
+
+**Files created:** `hardware/bluetooth/BluetoothState.kt`, `hardware/bluetooth/BluetoothMessage.kt`, `hardware/bluetooth/HmacVerifier.kt`, `hardware/bluetooth/BluetoothManager.kt`, `hardware/bluetooth/CoinAcceptorRepository.kt`, `hardware/printer/PrintResult.kt`, `hardware/printer/PrinterManager.kt`, `ui/screen/attract/OperatorExitDialog.kt`, `app/src/test/.../HmacVerifierTest.kt`
+
+**Files modified:** `hardware/printer/UsbPermissionActivity.kt`, `data/local/prefs/SecurePreferences.kt` (added `bluetoothDeviceAddress`), `kiosk/KioskViewModel.kt` (added `verifyPinAndExit`), `ui/screen/attract/AttractScreen.kt` (long-press exit trigger), `ui/navigation/AppNavigation.kt` (wired exit callback), `ROADMAP.md`

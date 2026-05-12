@@ -2,7 +2,9 @@ package com.pitiq.app;
 
 import androidx.hilt.work.HiltWrapper_WorkerFactoryModule;
 import com.pitiq.app.di.DatabaseModule;
+import com.pitiq.app.kiosk.KioskViewModel_HiltModules;
 import com.pitiq.app.session.SessionViewModel_HiltModules;
+import com.pitiq.app.ui.screen.setup.OperatorSetupViewModel_HiltModules;
 import dagger.Binds;
 import dagger.Component;
 import dagger.Module;
@@ -157,6 +159,8 @@ public final class PitiqApplication_HiltComponents {
       modules = {
           HiltWrapper_ActivityRetainedComponentManager_LifecycleModule.class,
           HiltWrapper_SavedStateHandleModule.class,
+          KioskViewModel_HiltModules.KeyModule.class,
+          OperatorSetupViewModel_HiltModules.KeyModule.class,
           ActivityCBuilderModule.class,
           ViewModelCBuilderModule.class,
           SessionViewModel_HiltModules.KeyModule.class
@@ -196,6 +200,8 @@ public final class PitiqApplication_HiltComponents {
   @Subcomponent(
       modules = {
           HiltWrapper_HiltViewModelFactory_ViewModelModule.class,
+          KioskViewModel_HiltModules.BindsModule.class,
+          OperatorSetupViewModel_HiltModules.BindsModule.class,
           SessionViewModel_HiltModules.BindsModule.class
       }
   )
