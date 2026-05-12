@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.pitiq.app.domain.state.SessionState
+import com.pitiq.app.kiosk.KioskViewModel
 import com.pitiq.app.session.SessionViewModel
 import com.pitiq.app.ui.screen.attract.AttractScreen
 import com.pitiq.app.ui.screen.capture.PhotoCaptureScreen
@@ -25,7 +26,15 @@ import com.pitiq.app.ui.screen.upload.UploadScreen
 fun AppNavigation(
     navController: NavHostController = rememberNavController(),
     sessionViewModel: SessionViewModel = hiltViewModel(),
+    kioskViewModel: KioskViewModel = hiltViewModel(),
 ) {
+    val isConfigured by kioskViewModel.isConfigured.collectAsState()
+
+    if (!isConfigured) {
+        OperatorSetupScreen()
+        return
+    }
+
     val sessionState by sessionViewModel.sessionState.collectAsState()
 
     // Drive navigation from SessionState so screens never navigate independently.
@@ -45,10 +54,6 @@ fun AppNavigation(
     }
 
     NavHost(navController = navController, startDestination = Screen.Attract.route) {
-
-        composable(Screen.OperatorSetup.route) {
-            OperatorSetupScreen()
-        }
         composable(Screen.Attract.route) {
             AttractScreen(
                 onTap = { sessionViewModel.initSession() },

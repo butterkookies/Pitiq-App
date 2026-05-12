@@ -51,26 +51,26 @@
 ### 1.1 Device Owner Setup
 - [x] 1.1.1 Create `KioskDeviceAdminReceiver` stub class (implementation deferred to Phase 1)
 - [x] 1.1.2 Declare `BIND_DEVICE_ADMIN` and `device_admin` XML metadata in `AndroidManifest.xml` (`res/xml/device_admin.xml`)
-- [ ] 1.1.3 Implement `DevicePolicyManager.setLockTaskPackages()` to whitelist only this app
-- [ ] 1.1.4 Call `Activity.startLockTask()` on session start
+- [x] 1.1.3 Implement `DevicePolicyManager.setLockTaskPackages()` to whitelist only this app
+- [x] 1.1.4 Call `Activity.startLockTask()` on session start
 - [ ] 1.1.5 Call `Activity.stopLockTask()` only from operator exit flow (PIN protected)
 - [ ] 1.1.6 Note: Device Owner provisioning method differs per manufacturer — test on each target device model. Some OEMs (Samsung DeX, Huawei) override COSU with proprietary kiosk SDKs; standard COSU APIs still work but behavior may vary. Verify lock task behavior on every new device before deployment.
 
 ### 1.2 UI Suppression
-- [ ] 1.2.1 Set `WindowInsetsController` to hide system bars (status bar, navigation bar)
-- [ ] 1.2.2 Use `SYSTEM_UI_FLAG_IMMERSIVE_STICKY` flags for full-screen immersive mode
-- [ ] 1.2.3 Disable screen timeout via `FLAG_KEEP_SCREEN_ON` on the Activity window
-- [ ] 1.2.4 Suppress notifications using `DevicePolicyManager.setStatusBarDisabled()`
-- [ ] 1.2.5 Block physical back button (override `onBackPressed` to no-op during session)
+- [x] 1.2.1 Set `WindowInsetsController` to hide system bars (status bar, navigation bar)
+- [x] 1.2.2 Use `SYSTEM_UI_FLAG_IMMERSIVE_STICKY` flags for full-screen immersive mode
+- [x] 1.2.3 Disable screen timeout via `FLAG_KEEP_SCREEN_ON` on the Activity window
+- [x] 1.2.4 Suppress notifications using `DevicePolicyManager.setStatusBarDisabled()`
+- [x] 1.2.5 Block physical back button (override `onBackPressed` to no-op during session)
 
 ### 1.3 First Launch — Operator Setup Screen
-- [ ] 1.3.1 On app start, check `EncryptedSharedPreferences` for `location_id`
-- [ ] 1.3.2 If not set, show operator setup screen (full-screen, before kiosk lock)
-- [ ] 1.3.3 Operator setup screen: text input for `location_id`, confirm button
-- [ ] 1.3.4 Validate `location_id` is non-empty and alphanumeric before saving
-- [ ] 1.3.5 Save `location_id` to `EncryptedSharedPreferences`
-- [ ] 1.3.6 After save, activate kiosk lock and proceed to attract screen
-- [ ] 1.3.7 Ensure operator setup screen is inaccessible after first setup (guarded by PIN)
+- [x] 1.3.1 On app start, check `EncryptedSharedPreferences` for `location_id`
+- [x] 1.3.2 If not set, show operator setup screen (full-screen, before kiosk lock)
+- [x] 1.3.3 Operator setup screen: text input for `location_id`, confirm button
+- [x] 1.3.4 Validate `location_id` is non-empty and alphanumeric before saving
+- [x] 1.3.5 Save `location_id` to `EncryptedSharedPreferences`
+- [x] 1.3.6 After save, activate kiosk lock and proceed to attract screen
+- [x] 1.3.7 Ensure operator setup screen is inaccessible after first setup (guarded by PIN)
 
 ---
 

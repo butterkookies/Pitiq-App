@@ -38,7 +38,7 @@ class SecurePreferences @Inject constructor(
         set(value) = prefs.edit().putString(KEY_BT_SHARED_SECRET, value).apply()
 
     val isConfigured: Boolean
-        get() = locationId != null
+        get() = locationId != null && operatorPin != null
 
     companion object {
         private const val KEY_LOCATION_ID = "location_id"

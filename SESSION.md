@@ -133,3 +133,38 @@
 **Files modified:** `app/build.gradle.kts`, `SessionViewModel.kt`, `AttractScreen.kt`, `UploadScreen.kt`, `PhotoCaptureScreen.kt`, `AppNavigation.kt`, `ROADMAP.md`, `~/.claude/settings.json`
 
 **Files created:** `keystore.properties.template`, `Makefile`, `build.ps1`
+
+---
+
+## Session 6 — 2026-05-12
+
+**Topic:** Phase 1 — Kiosk Mode (1.1 Device Owner, 1.2 UI Suppression, 1.3 Operator Setup)
+
+**Decisions made:**
+
+| # | Issue | Decision |
+|---|-------|----------|
+| 30 | Model usage policy | Opus used for planning only (Plan subagent). Sonnet used for all other processes (implementation, search, edits). |
+| 31 | OperatorSetup screen architecture | Removed from `Screen` sealed class and `NavHost`. It is a pre-FSM gate rendered by `AppNavigation` before the `NavHost` when `!isConfigured`. After setup, `KioskController.isConfigured` flips to true and `AppNavigation` recomposes into the FSM. |
+| 32 | Kiosk lock task activation | `KioskController` holds `shouldLock: StateFlow<Boolean>`. `MainActivity` collects it in a `repeatOnLifecycle(STARTED)` coroutine and calls `KioskManager.startLockTask(activity)` / `stopLockTask(activity)`. No Activity reference is held in any ViewModel. |
+| 33 | DPM Device Owner not provisioned | All `DevicePolicyManager` calls in `KioskManager` are wrapped in `runCatching`. If the device is not a Device Owner, `configureKioskPolicies()` returns false silently. App degrades gracefully to immersive-only mode. |
+| 34 | Immersive mode compatibility | `WindowInsetsControllerCompat` (AndroidX core) used instead of deprecated `SYSTEM_UI_FLAG_*` flags. Single implementation works on API 23+. Re-applied in `onWindowFocusChanged(hasFocus=true)` to survive dialog/popup dismissals. |
+| 35 | Operator PIN during setup | Roadmap 1.3.3 specifies only `location_id` input, but `operatorPin` must be set during setup for 1.3.7 (PIN guard on re-entry) to work. Setup screen collects both `location_id` and a 4–6 digit PIN. `SecurePreferences.isConfigured` tightened to require both fields. |
+| 36 | PIN storage | Stored directly in `EncryptedSharedPreferences` (AES256-GCM). No additional hashing for Phase 1. Phase 7 security hardening can add PBKDF2/salting if required. |
+
+**Phase 1 items completed:**
+- 1.1.3 `DevicePolicyManager.setLockTaskPackages()` — whitelist in `KioskManager.configureKioskPolicies()`
+- 1.1.4 `Activity.startLockTask()` — called reactively from `shouldLock` flow in `MainActivity`
+- 1.2.1 System bars hidden via `WindowInsetsControllerCompat.hide(systemBars())`
+- 1.2.2 Immersive sticky behavior via `BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE`
+- 1.2.3 `FLAG_KEEP_SCREEN_ON` added to Activity window in `onCreate`
+- 1.2.4 `DevicePolicyManager.setStatusBarDisabled()` in `KioskManager.configureKioskPolicies()`
+- 1.2.5 `onBackPressed` no-op (was already done; verified intact)
+- 1.3.1–1.3.7 Full operator setup screen with location ID + PIN validation, encrypted prefs save, kiosk lock activation, and pre-FSM gate guard
+
+**Phase 1 items remaining:**
+- 1.1.5 `Activity.stopLockTask()` from operator exit flow — infrastructure ready (`KioskController.requestExit()` + flow collector), but PIN-entry dialog UI not yet built
+
+**Files created:** `kiosk/KioskController.kt`, `kiosk/KioskManager.kt`, `kiosk/KioskViewModel.kt`, `ui/screen/setup/OperatorSetupViewModel.kt`
+
+**Files modified:** `data/local/prefs/SecurePreferences.kt`, `ui/screen/setup/OperatorSetupScreen.kt`, `ui/navigation/Screen.kt`, `ui/navigation/AppNavigation.kt`, `MainActivity.kt`, `ROADMAP.md`
