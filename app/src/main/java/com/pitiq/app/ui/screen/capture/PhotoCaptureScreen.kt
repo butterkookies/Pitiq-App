@@ -12,7 +12,11 @@ import com.pitiq.app.domain.model.CapturedPhoto
 
 // TODO Phase 3.4: CameraX preview, layout overlay, 10s countdown, burst capture
 @Composable
-fun PhotoCaptureScreen(onSlotCaptured: (CapturedPhoto) -> Unit) {
+fun PhotoCaptureScreen(
+    isRetake: Boolean = false,
+    onSlotCaptured: (CapturedPhoto) -> Unit,
+    onRetakeComplete: (CapturedPhoto) -> Unit,
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()

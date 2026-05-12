@@ -9,12 +9,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
-// TODO Phase 3.7: GIF assembly, Supabase upload, QR generation, 60s countdown
+// TODO Phase 3.7: GIF assembly, Supabase upload, progress indicator
 @Composable
 fun UploadScreen(
     onUploadComplete: (shareUrl: String) -> Unit,
     onUploadFailed: (error: String) -> Unit,
-    onQRExpired: () -> Unit,
 ) {
     Box(
         modifier = Modifier

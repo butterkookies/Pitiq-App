@@ -40,9 +40,9 @@
 - [x] 0.3.4 Set up `SecurePreferences` (`EncryptedSharedPreferences` wrapper) storing `location_id`, `operator_pin`, `bt_shared_secret`
 
 ### 0.4 Build & CI
-- [ ] 0.4.1 Configure debug and release build variants
-- [ ] 0.4.2 Set up APK signing config (keystore, storePassword via environment, not committed)
-- [ ] 0.4.3 Write a `Makefile` or `build.sh` for one-command APK build
+- [x] 0.4.1 Configure debug and release build variants (`debug` with `.debug` appended to applicationId, `release` with R8/shrinking enabled)
+- [x] 0.4.2 APK signing config reads from `keystore.properties` (gitignored) with env-var fallback (`KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`); `keystore.properties.template` committed as reference; signing silently skipped if keystore absent so debug builds always work
+- [x] 0.4.3 `Makefile` (`make debug`, `make release`, `make install`, `make clean`) and `build.ps1` for Windows one-command builds
 
 ---
 

@@ -51,7 +51,7 @@ fun AppNavigation(
         }
         composable(Screen.Attract.route) {
             AttractScreen(
-                onTap = { locationId -> sessionViewModel.initSession(locationId) },
+                onTap = { sessionViewModel.initSession() },
             )
         }
         composable(Screen.Payment.route) {
@@ -65,8 +65,11 @@ fun AppNavigation(
             )
         }
         composable(Screen.PhotoCapture.route) {
+            val state = sessionState as? SessionState.PhotoCapture
             PhotoCaptureScreen(
+                isRetake = state?.isRetake == true,
                 onSlotCaptured = { photo -> sessionViewModel.onSlotCaptured(photo) },
+                onRetakeComplete = { photo -> sessionViewModel.onRetakeComplete(photo) },
             )
         }
         composable(Screen.Edit.route) {
@@ -85,7 +88,6 @@ fun AppNavigation(
             UploadScreen(
                 onUploadComplete = { url -> sessionViewModel.onUploadComplete(url) },
                 onUploadFailed = { error -> sessionViewModel.onUploadFailed(error) },
-                onQRExpired = { sessionViewModel.resetToAttract() },
             )
         }
         composable(Screen.QRShare.route) {

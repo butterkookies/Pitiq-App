@@ -21,7 +21,8 @@
       "PowerShell(Tee-Object *)",
       "PowerShell($projectDir = \"C:\\\\Users\\\\user\\\\Documents\\\\ANDREI_FILES\\\\DEVFILES\\\\PROJECTS\\\\Pitiq Mobile\"; $env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; & \"$projectDir\\\\gradlew.bat\" --project-dir $projectDir clean :app:assembleDebug --no-daemon 2>&1 | Select-Object -Last 5)",
       "PowerShell(Test-Path)",
-      "PowerShell(Get-Content *)"
+      "PowerShell(Get-Content *)",
+      "Skill(update-config)"
     ]
   }
 }

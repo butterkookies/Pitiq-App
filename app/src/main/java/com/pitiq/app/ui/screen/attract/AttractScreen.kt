@@ -19,14 +19,13 @@ import androidx.compose.ui.unit.sp
 // TODO Phase 3.1: add Lottie animation, printer status check, "Out of Service" overlay
 @Composable
 fun AttractScreen(
-    locationId: String = "default",
-    onTap: (locationId: String) -> Unit,
+    onTap: () -> Unit,
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .clickable { onTap(locationId) },
+            .clickable { onTap() },
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {

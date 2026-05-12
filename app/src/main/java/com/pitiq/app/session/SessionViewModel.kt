@@ -1,6 +1,7 @@
 package com.pitiq.app.session
 
 import androidx.lifecycle.ViewModel
+import com.pitiq.app.data.local.prefs.SecurePreferences
 import com.pitiq.app.domain.model.CapturedPhoto
 import com.pitiq.app.domain.model.Layout
 import com.pitiq.app.domain.model.Session
@@ -15,7 +16,9 @@ import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
-class SessionViewModel @Inject constructor() : ViewModel() {
+class SessionViewModel @Inject constructor(
+    private val securePreferences: SecurePreferences,
+) : ViewModel() {
 
     private val _sessionState = MutableStateFlow<SessionState>(SessionState.Idle)
     val sessionState: StateFlow<SessionState> = _sessionState.asStateFlow()
@@ -23,7 +26,8 @@ class SessionViewModel @Inject constructor() : ViewModel() {
     private val _session = MutableStateFlow<Session?>(null)
     val session: StateFlow<Session?> = _session.asStateFlow()
 
-    fun initSession(locationId: String) {
+    fun initSession() {
+        val locationId = securePreferences.locationId ?: return
         val id = UUID.randomUUID().toString()
         _session.value = Session(sessionId = id, locationId = locationId)
         _sessionState.value = SessionState.Payment(id)

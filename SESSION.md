@@ -103,3 +103,33 @@
 - `gradle.properties`: added `android.suppressUnsupportedCompileSdk=36`
 
 **Files created:** `settings.gradle.kts`, `build.gradle.kts`, `gradle/libs.versions.toml`, `gradle.properties`, `app/build.gradle.kts`, `app/proguard-rules.pro`, `gradlew`, `gradlew.bat`, `gradle/wrapper/*`, `.gitignore`, `local.properties`, `AndroidManifest.xml`, all resource XMLs, all Kotlin source files listed above, `SESSION.md`
+
+---
+
+## Session 5 — 2026-05-12
+
+**Topic:** Phase 0 audit + bug fixes, 0.4 Build & CI, workflow config
+
+**Bugs found and fixed:**
+
+| # | Bug | Fix |
+|---|-----|-----|
+| B1 | `AttractScreen` passed hardcoded `locationId = "default"` to `SessionViewModel.initSession()` | Injected `SecurePreferences` into `SessionViewModel`; `initSession()` now reads `locationId` directly, takes no parameter; `AttractScreen.onTap` is now `() -> Unit` |
+| B2 | `UploadScreen` had dead `onQRExpired` callback — QR is shown on `QRShareScreen`, not `UploadScreen` | Removed `onQRExpired` from `UploadScreen` and its call site in `AppNavigation` |
+| B3 | `PhotoCaptureScreen` had only `onSlotCaptured`; retake path would have appended a duplicate capture instead of replacing the slot | Added `isRetake: Boolean` parameter and `onRetakeComplete` callback; `AppNavigation` reads `PhotoCapture.isRetake` from state to pass to the screen |
+
+**Phase 0.4 Build & CI completed:**
+- `app/build.gradle.kts`: added `signingConfigs { release { ... } }` reading from `keystore.properties` (gitignored) with env-var fallback (`KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`); signing skipped silently if keystore absent
+- `keystore.properties.template`: committed as reference with `keytool` generation command
+- `Makefile`: `make debug`, `make release`, `make install`, `make clean`
+- `build.ps1`: Windows equivalent with same four targets
+
+**ROADMAP.md updated:** All Phase 0 items marked `[x]`. Phase 1.1.1–1.1.2 and 2.1.1, 2.2.1–2.2.2 marked for manifest stubs written in Session 4.
+
+**Workflow configured:**
+- `~/.claude/settings.json`: `"defaultMode": "bypassPermissions"` — all tool calls auto-approved globally
+- Memory saved: stop after each phase/checkpoint and wait for user before proceeding (token limit guard)
+
+**Files modified:** `app/build.gradle.kts`, `SessionViewModel.kt`, `AttractScreen.kt`, `UploadScreen.kt`, `PhotoCaptureScreen.kt`, `AppNavigation.kt`, `ROADMAP.md`, `~/.claude/settings.json`
+
+**Files created:** `keystore.properties.template`, `Makefile`, `build.ps1`
