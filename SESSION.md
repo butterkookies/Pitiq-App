@@ -96,4 +96,10 @@
 - 0.2.6–0.2.8 `WindowSizeClass` integration + adaptive layout rules (deferred to Phase 3 screen implementations)
 - 0.4.1–0.4.3 Build variants, APK signing, Makefile (deferred)
 
-**Files created:** `settings.gradle.kts`, `build.gradle.kts`, `gradle/libs.versions.toml`, `gradle.properties`, `app/build.gradle.kts`, `app/proguard-rules.pro`, `gradlew`, `gradlew.bat`, `gradle/wrapper/*`, `.gitignore`, `AndroidManifest.xml`, all resource XMLs, all Kotlin source files listed above, `SESSION.md`
+**Build result:** `BUILD SUCCESSFUL` — `app-debug.apk` (17 MB) produced. All 41 tasks executed clean. Only warnings: AGP 8.9.0 + compileSdk=36 mismatch (suppressed via `android.suppressUnsupportedCompileSdk=36`), Hilt deprecated API in generated sources (benign).
+
+**Post-log fixes applied:**
+- `DatabaseModule.kt`: updated `fallbackToDestructiveMigration()` → `fallbackToDestructiveMigration(dropAllTables = true)` (Room API change)
+- `gradle.properties`: added `android.suppressUnsupportedCompileSdk=36`
+
+**Files created:** `settings.gradle.kts`, `build.gradle.kts`, `gradle/libs.versions.toml`, `gradle.properties`, `app/build.gradle.kts`, `app/proguard-rules.pro`, `gradlew`, `gradlew.bat`, `gradle/wrapper/*`, `.gitignore`, `local.properties`, `AndroidManifest.xml`, all resource XMLs, all Kotlin source files listed above, `SESSION.md`

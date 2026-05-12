@@ -3,27 +3,27 @@
 > Android photobooth app for coin-operated cafe kiosk machines.
 > Stack: Kotlin + Jetpack Compose (Android), Supabase (PostgreSQL + Storage + Auth + Edge Functions), Vercel (Next.js share page).
 > Target devices: Oppo Reno 5 5G (primary), expandable to tablets and other Android devices. minSdk API 23 (Android 6.0), kiosk mode via Device Owner COSU APIs.
-> Last updated: 2026-05-12
+> Last updated: 2026-05-12 (Session 4)
 
 ---
 
 ## PHASE 0 — PROJECT FOUNDATION
 
 ### 0.1 Android Project Setup
-- [ ] 0.1.1 Create new Android project in Android Studio (Kotlin, Jetpack Compose)
-- [ ] 0.1.2 Set `minSdk = 23`, `targetSdk = 34` in `build.gradle` (API 23 is the hard floor due to `EncryptedSharedPreferences`; covers ~99% of active Android devices)
-- [ ] 0.1.3 Configure `applicationId`, `versionCode`, `versionName`
-- [ ] 0.1.4 Add dependencies: Jetpack Compose BOM, Navigation Compose, CameraX, Kotlin Coroutines, Kotlinx Serialization, Ktor (HTTP client), Supabase Kotlin SDK, AndroidX Security (EncryptedSharedPreferences)
-- [ ] 0.1.5 Set up Hilt for dependency injection
-- [ ] 0.1.6 Configure ProGuard/R8 rules for release build
-- [ ] 0.1.7 Set up Git repository and `.gitignore`
+- [x] 0.1.1 Create new Android project in Android Studio (Kotlin, Jetpack Compose)
+- [x] 0.1.2 Set `minSdk = 23`, `targetSdk = 35`, `compileSdk = 36` in `app/build.gradle.kts` (targetSdk bumped from 34; only SDK 36 platform is installed)
+- [x] 0.1.3 Configure `applicationId = "com.pitiq.app"`, `versionCode = 1`, `versionName = "0.1.0"`
+- [x] 0.1.4 Add dependencies: Compose BOM, Navigation Compose, CameraX, Coroutines, Kotlinx Serialization, Ktor, Supabase Kotlin SDK, AndroidX Security — all via version catalog (`gradle/libs.versions.toml`)
+- [x] 0.1.5 Set up Hilt (hilt-android 2.52, KSP 2.1.0-1.0.29, `@HiltAndroidApp` on `PitiqApplication`)
+- [x] 0.1.6 Configure ProGuard/R8 rules (`app/proguard-rules.pro`) for Serialization, Ktor, Supabase, ZXing, Hilt
+- [x] 0.1.7 Set up Git repository (Session 3) and `.gitignore` (Session 4)
 
 ### 0.2 Project Architecture & Responsiveness
-- [ ] 0.2.1 Define package structure: `ui/`, `domain/`, `data/`, `hardware/`, `kiosk/`, `session/`
-- [ ] 0.2.2 Define navigation graph with all screens: Attract → Payment → LayoutSelection → PhotoCapture → Edit → Print → Upload → QRShare → (Attract)
-- [ ] 0.2.3 Define `SessionState` sealed class covering all session phases
-- [ ] 0.2.4 Define `SessionViewModel` as the central session state holder
-- [ ] 0.2.5 Define `Session` domain model with all fields from spec (session_id, coins_inserted, layout, captures, etc.)
+- [x] 0.2.1 Define package structure: `ui/`, `domain/`, `data/`, `hardware/`, `kiosk/`, `session/`, `di/`
+- [x] 0.2.2 Define navigation graph with all screens: Attract → Payment → LayoutSelection → PhotoCapture → Edit → Print → Upload → QRShare → (Attract); also OperatorSetup. State-driven via `LaunchedEffect(sessionState)` in `AppNavigation.kt` — screens never self-navigate.
+- [x] 0.2.3 Define `SessionState` sealed class covering all session phases (`Idle`, `Payment`, `LayoutSelection`, `PhotoCapture`, `Edit`, `Print`, `Upload`, `QRShare`)
+- [x] 0.2.4 Define `SessionViewModel` as the central session state holder (`@HiltViewModel`, full state machine with all transitions)
+- [x] 0.2.5 Define `Session`, `Layout`, `CapturedPhoto`, `TextField`, `UploadStatus` domain models in `domain/model/`
 - [ ] 0.2.6 Integrate `WindowSizeClass` (Jetpack Compose adaptive) to detect phone vs tablet form factor
 - [ ] 0.2.7 Define adaptive layout rules per screen:
   - Attract: scale animation and text to screen size
@@ -34,10 +34,10 @@
 - [ ] 0.2.8 Ensure minimum touch target size 48dp across all interactive elements (readability at arm's length on any screen size)
 
 ### 0.3 Local Data Layer
-- [ ] 0.3.1 Set up Room database for offline session queue (pending uploads)
-- [ ] 0.3.2 Define `SessionEntity` and `LayoutEntity` Room entities
-- [ ] 0.3.3 Define `UploadQueueDao` for queued upload operations
-- [ ] 0.3.4 Set up `EncryptedSharedPreferences` wrapper for sensitive storage (location_id, operator PIN)
+- [x] 0.3.1 Set up Room database for offline session queue (`PitiqDatabase`, injected via `DatabaseModule`)
+- [x] 0.3.2 Define `SessionEntity` Room entity (maps to `upload_queue` table); `LayoutEntity` deferred to Phase 3.3 when layout sync is implemented
+- [x] 0.3.3 Define `UploadQueueDao` for queued upload operations (`enqueue`, `getPending`, `updateStatus`, `delete`)
+- [x] 0.3.4 Set up `SecurePreferences` (`EncryptedSharedPreferences` wrapper) storing `location_id`, `operator_pin`, `bt_shared_secret`
 
 ### 0.4 Build & CI
 - [ ] 0.4.1 Configure debug and release build variants
@@ -49,8 +49,8 @@
 ## PHASE 1 — KIOSK MODE
 
 ### 1.1 Device Owner Setup
-- [ ] 1.1.1 Create a Device Admin receiver class (`KioskDeviceAdminReceiver`)
-- [ ] 1.1.2 Declare `BIND_DEVICE_ADMIN` and `device_admin` XML metadata in `AndroidManifest.xml`
+- [x] 1.1.1 Create `KioskDeviceAdminReceiver` stub class (implementation deferred to Phase 1)
+- [x] 1.1.2 Declare `BIND_DEVICE_ADMIN` and `device_admin` XML metadata in `AndroidManifest.xml` (`res/xml/device_admin.xml`)
 - [ ] 1.1.3 Implement `DevicePolicyManager.setLockTaskPackages()` to whitelist only this app
 - [ ] 1.1.4 Call `Activity.startLockTask()` on session start
 - [ ] 1.1.5 Call `Activity.stopLockTask()` only from operator exit flow (PIN protected)
@@ -77,7 +77,7 @@
 ## PHASE 2 — HARDWARE INTEGRATION
 
 ### 2.1 ESP32 Bluetooth Serial (Coin Acceptor)
-- [ ] 2.1.1 Declare Bluetooth permissions in manifest for both API ranges:
+- [x] 2.1.1 Declare Bluetooth permissions in manifest for both API ranges:
   - Legacy (API 23–30): `BLUETOOTH`, `BLUETOOTH_ADMIN`
   - Modern (API 31+): `BLUETOOTH_CONNECT`, `BLUETOOTH_SCAN`
   - At runtime: check `Build.VERSION.SDK_INT >= 31` and request the correct permission set accordingly
@@ -101,11 +101,11 @@
 - [ ] 2.1.9 Write unit tests for HMAC verification logic
 
 ### 2.2 Thermal Printer (USB OTG)
-- [ ] 2.2.1 Add `android.hardware.usb.host` feature (as `required="false"`) and `USB_PERMISSION` to manifest
+- [x] 2.2.1 Add `android.hardware.usb.host` feature (as `required="false"`) and `USB_PERMISSION` to manifest
 - [ ] 2.2.1a On app start, check `packageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)`:
   - If `false` → show persistent operator alert "This device does not support USB printing", disable print path entirely
   - If `true` → proceed with normal printer init flow
-- [ ] 2.2.2 Add USB device filter XML for 58mm thermal printer VID/PID
+- [x] 2.2.2 Add USB device filter XML (`res/xml/usb_device_filter.xml`); VID/PID is placeholder — must be confirmed against physical printer before Phase 2.2 implementation
 - [ ] 2.2.3 Implement `PrinterManager` class:
   - [ ] Detect USB device on `UsbManager.getDeviceList()`
   - [ ] Request `UsbManager.requestPermission()` and await result via `BroadcastReceiver`
