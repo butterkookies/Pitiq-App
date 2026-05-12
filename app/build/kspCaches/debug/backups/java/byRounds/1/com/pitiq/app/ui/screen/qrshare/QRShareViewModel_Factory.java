@@ -19,7 +19,8 @@ import javax.annotation.processing.Generated;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 public final class QRShareViewModel_Factory implements Factory<QRShareViewModel> {
   @Override
@@ -36,6 +37,6 @@ public final class QRShareViewModel_Factory implements Factory<QRShareViewModel>
   }
 
   private static final class InstanceHolder {
-    private static final QRShareViewModel_Factory INSTANCE = new QRShareViewModel_Factory();
+    static final QRShareViewModel_Factory INSTANCE = new QRShareViewModel_Factory();
   }
 }

@@ -1,7 +1,9 @@
 package com.pitiq.app.session
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.pitiq.app.data.local.prefs.SecurePreferences
+import com.pitiq.app.data.repository.LayoutSyncManager
 import com.pitiq.app.session.SessionCleaner
 import com.pitiq.app.domain.model.CapturedPhoto
 import com.pitiq.app.domain.model.Layout
@@ -13,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
 
@@ -20,6 +23,7 @@ import javax.inject.Inject
 class SessionViewModel @Inject constructor(
     private val securePreferences: SecurePreferences,
     private val sessionCleaner: SessionCleaner,
+    private val layoutSyncManager: LayoutSyncManager,
 ) : ViewModel() {
 
     private val _sessionState = MutableStateFlow<SessionState>(SessionState.Idle)
@@ -139,11 +143,13 @@ class SessionViewModel @Inject constructor(
         _session.value?.sessionId?.let { sessionCleaner.clean(it) }
         _session.value = null
         _sessionState.value = SessionState.Idle
+        viewModelScope.launch { layoutSyncManager.sync() }
     }
 
     fun resetToAttract() {
         _session.value?.sessionId?.let { sessionCleaner.clean(it) }
         _session.value = null
         _sessionState.value = SessionState.Idle
+        viewModelScope.launch { layoutSyncManager.sync() }
     }
 }

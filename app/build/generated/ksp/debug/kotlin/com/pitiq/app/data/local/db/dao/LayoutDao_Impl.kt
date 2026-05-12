@@ -121,6 +121,54 @@ public class LayoutDao_Impl(
     }
   }
 
+  public override suspend fun getAll(): List<LayoutEntity> {
+    val _sql: String = "SELECT * FROM layout_cache"
+    return performSuspending(__db, true, false) { _connection ->
+      val _stmt: SQLiteStatement = _connection.prepare(_sql)
+      try {
+        val _columnIndexOfId: Int = getColumnIndexOrThrow(_stmt, "id")
+        val _columnIndexOfName: Int = getColumnIndexOrThrow(_stmt, "name")
+        val _columnIndexOfSlotCount: Int = getColumnIndexOrThrow(_stmt, "slotCount")
+        val _columnIndexOfFrameAssetUrl: Int = getColumnIndexOrThrow(_stmt, "frameAssetUrl")
+        val _columnIndexOfPreviewUrl: Int = getColumnIndexOrThrow(_stmt, "previewUrl")
+        val _columnIndexOfTextFieldsJson: Int = getColumnIndexOrThrow(_stmt, "textFieldsJson")
+        val _columnIndexOfVersion: Int = getColumnIndexOrThrow(_stmt, "version")
+        val _columnIndexOfIsActive: Int = getColumnIndexOrThrow(_stmt, "isActive")
+        val _columnIndexOfSortOrder: Int = getColumnIndexOrThrow(_stmt, "sortOrder")
+        val _result: MutableList<LayoutEntity> = mutableListOf()
+        while (_stmt.step()) {
+          val _item: LayoutEntity
+          val _tmpId: String
+          _tmpId = _stmt.getText(_columnIndexOfId)
+          val _tmpName: String
+          _tmpName = _stmt.getText(_columnIndexOfName)
+          val _tmpSlotCount: Int
+          _tmpSlotCount = _stmt.getLong(_columnIndexOfSlotCount).toInt()
+          val _tmpFrameAssetUrl: String
+          _tmpFrameAssetUrl = _stmt.getText(_columnIndexOfFrameAssetUrl)
+          val _tmpPreviewUrl: String
+          _tmpPreviewUrl = _stmt.getText(_columnIndexOfPreviewUrl)
+          val _tmpTextFieldsJson: String
+          _tmpTextFieldsJson = _stmt.getText(_columnIndexOfTextFieldsJson)
+          val _tmpVersion: Int
+          _tmpVersion = _stmt.getLong(_columnIndexOfVersion).toInt()
+          val _tmpIsActive: Boolean
+          val _tmp: Int
+          _tmp = _stmt.getLong(_columnIndexOfIsActive).toInt()
+          _tmpIsActive = _tmp != 0
+          val _tmpSortOrder: Int
+          _tmpSortOrder = _stmt.getLong(_columnIndexOfSortOrder).toInt()
+          _item =
+              LayoutEntity(_tmpId,_tmpName,_tmpSlotCount,_tmpFrameAssetUrl,_tmpPreviewUrl,_tmpTextFieldsJson,_tmpVersion,_tmpIsActive,_tmpSortOrder)
+          _result.add(_item)
+        }
+        _result
+      } finally {
+        _stmt.close()
+      }
+    }
+  }
+
   public override suspend fun deleteById(id: String) {
     val _sql: String = "DELETE FROM layout_cache WHERE id = ?"
     return performSuspending(__db, false, true) { _connection ->

@@ -1,0 +1,1 @@
+-keep,allowobfuscation,allowshrinking class com.pitiq.app.ui.screen.edit.EditViewModel

@@ -3,10 +3,10 @@ package com.pitiq.app.ui.screen.layout;
 import com.pitiq.app.data.repository.LayoutRepository;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
+import dagger.internal.Provider;
 import dagger.internal.QualifierMetadata;
 import dagger.internal.ScopeMetadata;
 import javax.annotation.processing.Generated;
-import javax.inject.Provider;
 
 @ScopeMetadata
 @QualifierMetadata
@@ -21,7 +21,8 @@ import javax.inject.Provider;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 public final class LayoutSelectionViewModel_Factory implements Factory<LayoutSelectionViewModel> {
   private final Provider<LayoutRepository> layoutRepositoryProvider;

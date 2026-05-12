@@ -21,7 +21,8 @@ import javax.annotation.processing.Generated;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 public final class SupabaseModule_ProvideSupabaseClientFactory implements Factory<SupabaseClient> {
   @Override
@@ -38,6 +39,6 @@ public final class SupabaseModule_ProvideSupabaseClientFactory implements Factor
   }
 
   private static final class InstanceHolder {
-    private static final SupabaseModule_ProvideSupabaseClientFactory INSTANCE = new SupabaseModule_ProvideSupabaseClientFactory();
+    static final SupabaseModule_ProvideSupabaseClientFactory INSTANCE = new SupabaseModule_ProvideSupabaseClientFactory();
   }
 }

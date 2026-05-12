@@ -2,9 +2,18 @@ package com.pitiq.app;
 
 import androidx.hilt.work.HiltWrapper_WorkerFactoryModule;
 import com.pitiq.app.di.DatabaseModule;
+import com.pitiq.app.di.NetworkModule;
+import com.pitiq.app.di.SupabaseModule;
 import com.pitiq.app.kiosk.KioskViewModel_HiltModules;
 import com.pitiq.app.session.SessionViewModel_HiltModules;
+import com.pitiq.app.ui.screen.attract.AttractViewModel_HiltModules;
+import com.pitiq.app.ui.screen.edit.EditViewModel_HiltModules;
+import com.pitiq.app.ui.screen.layout.LayoutSelectionViewModel_HiltModules;
+import com.pitiq.app.ui.screen.payment.PaymentViewModel_HiltModules;
+import com.pitiq.app.ui.screen.print.PrintViewModel_HiltModules;
+import com.pitiq.app.ui.screen.qrshare.QRShareViewModel_HiltModules;
 import com.pitiq.app.ui.screen.setup.OperatorSetupViewModel_HiltModules;
+import com.pitiq.app.ui.screen.upload.UploadViewModel_HiltModules;
 import dagger.Binds;
 import dagger.Component;
 import dagger.Module;
@@ -133,8 +142,10 @@ public final class PitiqApplication_HiltComponents {
           DatabaseModule.class,
           HiltWrapper_FragmentGetContextFix_FragmentGetContextFixModule.class,
           HiltWrapper_WorkerFactoryModule.class,
+          NetworkModule.class,
           ActivityRetainedCBuilderModule.class,
-          ServiceCBuilderModule.class
+          ServiceCBuilderModule.class,
+          SupabaseModule.class
       }
   )
   @Singleton
@@ -157,13 +168,20 @@ public final class PitiqApplication_HiltComponents {
 
   @Subcomponent(
       modules = {
+          AttractViewModel_HiltModules.KeyModule.class,
+          EditViewModel_HiltModules.KeyModule.class,
           HiltWrapper_ActivityRetainedComponentManager_LifecycleModule.class,
           HiltWrapper_SavedStateHandleModule.class,
           KioskViewModel_HiltModules.KeyModule.class,
+          LayoutSelectionViewModel_HiltModules.KeyModule.class,
           OperatorSetupViewModel_HiltModules.KeyModule.class,
+          PaymentViewModel_HiltModules.KeyModule.class,
           ActivityCBuilderModule.class,
           ViewModelCBuilderModule.class,
-          SessionViewModel_HiltModules.KeyModule.class
+          PrintViewModel_HiltModules.KeyModule.class,
+          QRShareViewModel_HiltModules.KeyModule.class,
+          SessionViewModel_HiltModules.KeyModule.class,
+          UploadViewModel_HiltModules.KeyModule.class
       }
   )
   @ActivityRetainedScoped
@@ -199,10 +217,17 @@ public final class PitiqApplication_HiltComponents {
 
   @Subcomponent(
       modules = {
+          AttractViewModel_HiltModules.BindsModule.class,
+          EditViewModel_HiltModules.BindsModule.class,
           HiltWrapper_HiltViewModelFactory_ViewModelModule.class,
           KioskViewModel_HiltModules.BindsModule.class,
+          LayoutSelectionViewModel_HiltModules.BindsModule.class,
           OperatorSetupViewModel_HiltModules.BindsModule.class,
-          SessionViewModel_HiltModules.BindsModule.class
+          PaymentViewModel_HiltModules.BindsModule.class,
+          PrintViewModel_HiltModules.BindsModule.class,
+          QRShareViewModel_HiltModules.BindsModule.class,
+          SessionViewModel_HiltModules.BindsModule.class,
+          UploadViewModel_HiltModules.BindsModule.class
       }
   )
   @ViewModelScoped

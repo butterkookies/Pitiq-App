@@ -31,7 +31,17 @@
       "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; Set-Location \"C:\\\\Users\\\\user\\\\Documents\\\\ANDREI_FILES\\\\DEVFILES\\\\PROJECTS\\\\Pitiq Mobile\"; .\\\\gradlew :app:compileDebugKotlin --no-daemon 2>&1 | Select-Object -Last 40)",
       "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; Set-Location \"C:\\\\Users\\\\user\\\\Documents\\\\ANDREI_FILES\\\\DEVFILES\\\\PROJECTS\\\\Pitiq Mobile\"; .\\\\gradlew :app:testDebugUnitTest --no-daemon 2>&1 | Select-Object -Last 25)",
       "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; Set-Location \"C:\\\\Users\\\\user\\\\Documents\\\\ANDREI_FILES\\\\DEVFILES\\\\PROJECTS\\\\Pitiq Mobile\"; .\\\\gradlew :app:testDebugUnitTest --no-daemon --stacktrace 2>&1 | Select-String -Pattern \"\\(HmacVerifier|PASSED|FAILED|ERROR|test\\)\" | Select-Object -First 30)",
-      "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; Set-Location \"C:\\\\Users\\\\user\\\\Documents\\\\ANDREI_FILES\\\\DEVFILES\\\\PROJECTS\\\\Pitiq Mobile\"; .\\\\gradlew :app:compileDebugKotlin --no-daemon 2>&1 | Select-Object -Last 15)"
+      "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; Set-Location \"C:\\\\Users\\\\user\\\\Documents\\\\ANDREI_FILES\\\\DEVFILES\\\\PROJECTS\\\\Pitiq Mobile\"; .\\\\gradlew :app:compileDebugKotlin --no-daemon 2>&1 | Select-Object -Last 15)",
+      "Bash(npm install *)",
+      "Bash(./gradlew assembleDebug)",
+      "Bash(./gradlew assembleDebug --stacktrace)",
+      "Bash(./gradlew assembleDebug --info)",
+      "Bash(./gradlew assembleDebug --no-configuration-cache)",
+      "Bash(./gradlew assembleDebug --no-configuration-cache --stacktrace)",
+      "Bash(java -version)",
+      "Bash(./gradlew --version)",
+      "Bash(rtk read *)",
+      "Bash(./gradlew clean *)"
     ]
   }
 }

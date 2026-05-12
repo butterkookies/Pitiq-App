@@ -3,7 +3,7 @@
 > Android photobooth app for coin-operated cafe kiosk machines.
 > Stack: Kotlin + Jetpack Compose (Android), Supabase (PostgreSQL + Storage + Auth + Edge Functions), Vercel (Next.js share page).
 > Target devices: Oppo Reno 5 5G (primary), expandable to tablets and other Android devices. minSdk API 23 (Android 6.0), kiosk mode via Device Owner COSU APIs.
-> Last updated: 2026-05-13 (Session 5)
+> Last updated: 2026-05-13 (Session 9)
 
 ---
 
@@ -238,10 +238,10 @@
 ## PHASE 4 — BACKEND (SUPABASE)
 
 ### 4.1 Database Schema
-- [ ] 4.1.1 Create `sessions` table with columns:
+- [x] 4.1.1 Create `sessions` table with columns:
   - `session_id UUID PRIMARY KEY`
   - `created_at TIMESTAMPTZ DEFAULT NOW()`
-  - `expires_at TIMESTAMPTZ` (= created_at + 24 hours)
+  - `expires_at TIMESTAMPTZ` (= created_at + 24 hours, generated column)
   - `storage_urls JSONB` (keys: thermal, color, gif)
   - `location_id TEXT NOT NULL`
   - `coins_inserted INT NOT NULL`
@@ -251,63 +251,43 @@
   - `upload_status TEXT CHECK (upload_status IN ('pending','uploaded','failed')) DEFAULT 'pending'`
   - `upload_attempted_at TIMESTAMPTZ`
   - `purged BOOLEAN DEFAULT FALSE`
-- [ ] 4.1.2 Create `layouts` table:
-  - `id UUID PRIMARY KEY`
-  - `name TEXT NOT NULL`
-  - `slot_count INT NOT NULL`
-  - `frame_asset_url TEXT`
-  - `preview_url TEXT`
-  - `text_fields JSONB`
-  - `version INT NOT NULL`
-  - `active BOOLEAN DEFAULT TRUE`
-  - `sort_order INT`
-  - `created_at TIMESTAMPTZ DEFAULT NOW()`
-- [ ] 4.1.3 Create `locations` table:
-  - `location_id TEXT PRIMARY KEY`
-  - `name TEXT`
-  - `created_at TIMESTAMPTZ DEFAULT NOW()`
-- [ ] 4.1.4 Enable Row Level Security (RLS) on all tables
-- [ ] 4.1.5 Write RLS policies:
-  - Sessions: INSERT from anon (device writes its own session), SELECT only for authenticated operators
-  - Layouts: SELECT for anon, INSERT/UPDATE/DELETE only for authenticated operators
-  - Locations: SELECT for anon, full access for operators
+- [x] 4.1.2 Create `layouts` table
+- [x] 4.1.3 Create `locations` table
+- [x] 4.1.4 Enable Row Level Security (RLS) on all tables
+- [x] 4.1.5 Write RLS policies (sessions anon INSERT / auth SELECT; layouts anon SELECT / auth all; locations anon SELECT / auth all)
+- Note: Run `supabase/migrations/20260513_001_create_tables.sql` in Supabase SQL editor
 
 ### 4.2 Supabase Storage
-- [ ] 4.2.1 Create `sessions` storage bucket (private, not public)
-- [ ] 4.2.2 Create `layouts` storage bucket (public read, write for operators only)
-- [ ] 4.2.3 Set storage RLS: device can write to `sessions/[session_id]/`, operators can write to `layouts/`
-- [ ] 4.2.4 Verify signed URL generation works with 30-minute expiry
+- [x] 4.2.1 Create `sessions` storage bucket (private, not public)
+- [x] 4.2.2 Create `layouts` storage bucket (public read, write for operators only)
+- [x] 4.2.3 Set storage RLS (anon upload to sessions; public read layouts; auth write layouts/updates)
+- [ ] 4.2.4 Verify signed URL generation works with 30-minute expiry (test after deploying)
+- Note: Run `supabase/migrations/20260513_002_storage_setup.sql` in Supabase SQL editor
 
 ### 4.3 Purge Edge Function
-- [ ] 4.3.1 Write Supabase Edge Function `purge-expired-sessions`:
-  - [ ] Query sessions where `expires_at < NOW()` AND `purged = FALSE`
-  - [ ] For each: delete files from storage at `sessions/[session_id]/` (idempotent — no error if missing)
-  - [ ] Update record: `purged = TRUE`
-- [ ] 4.3.2 Schedule edge function via Supabase cron (every hour)
-- [ ] 4.3.3 Test purge function handles missing files gracefully (no exception on 404)
+- [x] 4.3.1 Write Supabase Edge Function `purge-expired-sessions` (`supabase/functions/purge-expired-sessions/index.ts`)
+- [x] 4.3.2 Schedule edge function via pg_cron (SQL in `supabase/migrations/20260513_003_cron_schedule.sql`)
+- [ ] 4.3.3 Test purge function handles missing files gracefully (run after deployment)
+- Note: Deploy with `supabase functions deploy purge-expired-sessions`
 
 ### 4.4 Layout Sync (Device ↔ Supabase)
-- [ ] 4.4.1 Implement `LayoutSyncManager` in Android app:
-  - [ ] On app launch (if online): fetch all `active = TRUE` layouts from Supabase
-  - [ ] After each session (if online): check for layout updates
-  - [ ] Compare version numbers; update local Room DB with newer entries
-  - [ ] Download new frame assets and preview images to `filesDir/layouts/`
-- [ ] 4.4.2 Ensure sync never interrupts an active session (run on background coroutine, guarded by session state check)
+- [x] 4.4.1 Implemented `LayoutSyncManager` (`data/repository/LayoutSyncManager.kt`):
+  - [x] On app launch (if online): fetch all `active = TRUE` layouts from Supabase
+  - [x] After each session (if online): triggered by `SessionViewModel.resetToAttract()` / `cancelSession()`
+  - [x] Compare version numbers; update local Room DB with newer entries only
+  - [x] Download new frame assets and preview images to `filesDir/layouts/`
+- [x] 4.4.2 Sync never interrupts active session (called only when transitioning to Idle)
 
 ### 4.5 In-App Update Endpoint
-- [ ] 4.5.1 Create `update.json` hosted on Supabase Storage or Vercel:
-  ```json
-  { "version": 2, "versionName": "1.1.0", "apkUrl": "https://...", "changelog": "..." }
-  ```
-- [ ] 4.5.2 Implement `UpdateChecker` in Android app:
-  - [ ] Fetch `update.json` on app launch and after each session (if online)
-  - [ ] Compare `version` to current `BuildConfig.VERSION_CODE`
-  - [ ] If newer: show update modal (version, changelog, Download button)
-  - [ ] Download APK to `getExternalFilesDir()`
-  - [ ] Trigger system package installer via `FileProvider` + `Intent.ACTION_VIEW`
-  - [ ] Dismiss modal via operator PIN or gesture
-  - [ ] Re-show modal on next connectivity check if update still pending
-  - [ ] Do not show update modal during active customer session
+- [x] 4.5.1 `update.json` template at `supabase/update.json` — upload to Supabase Storage `updates/` bucket
+- [x] 4.5.2 Implemented `UpdateChecker` (`data/update/UpdateChecker.kt`):
+  - [x] Fetch `update.json` on app launch (if online)
+  - [x] Compare `version` to current `BuildConfig.VERSION_CODE`
+  - [x] If newer: show `UpdateAvailableDialog` (version, changelog, Download & Install button)
+  - [x] Download APK to `getExternalFilesDir()` via Ktor
+  - [x] Trigger system package installer via `FileProvider` + `Intent.ACTION_VIEW`
+  - [x] Dismiss via "Later" button (re-shown on next check)
+  - [x] Update modal only shown when `SessionState.Idle`
 
 ---
 

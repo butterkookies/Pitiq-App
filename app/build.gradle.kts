@@ -16,6 +16,12 @@ val keystoreProps = Properties().also { props ->
     if (file.exists()) props.load(file.inputStream())
 }
 
+// Load local dev config from local.properties (never committed).
+val localProps = Properties().also { props ->
+    val file = rootProject.file("local.properties")
+    if (file.exists()) props.load(file.inputStream())
+}
+
 android {
     namespace = "com.pitiq.app"
     compileSdk = 36
@@ -29,11 +35,18 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Supabase config — set via environment or local.properties before Phase 4 backend setup.
-        val supabaseUrl = System.getenv("SUPABASE_URL") ?: "https://placeholder.supabase.co"
-        val supabaseKey = System.getenv("SUPABASE_ANON_KEY") ?: "placeholder-anon-key"
+        val supabaseUrl = localProps.getProperty("SUPABASE_URL")
+            ?: System.getenv("SUPABASE_URL")
+            ?: "https://placeholder.supabase.co"
+        val supabaseKey = localProps.getProperty("SUPABASE_ANON_KEY")
+            ?: System.getenv("SUPABASE_ANON_KEY")
+            ?: "placeholder-anon-key"
+        val updateJsonUrl = localProps.getProperty("UPDATE_JSON_URL")
+            ?: System.getenv("UPDATE_JSON_URL")
+            ?: ""
         buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"$supabaseKey\"")
+        buildConfigField("String", "UPDATE_JSON_URL", "\"$updateJsonUrl\"")
     }
 
     signingConfigs {

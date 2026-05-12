@@ -259,3 +259,57 @@
 **Files created:** `data/local/db/entity/LayoutEntity.kt`, `data/local/db/dao/LayoutDao.kt`, `data/repository/LayoutRepository.kt`, `session/SessionCleaner.kt`, `hardware/media/GifEncoder.kt`, `hardware/media/MediaProcessor.kt`, `di/SupabaseModule.kt`, `ui/screen/attract/AttractViewModel.kt`, `ui/screen/payment/PaymentViewModel.kt`, `ui/screen/layout/LayoutSelectionViewModel.kt`, `ui/screen/edit/EditViewModel.kt`, `ui/screen/print/PrintViewModel.kt`, `ui/screen/upload/UploadViewModel.kt`, `ui/screen/qrshare/QRShareViewModel.kt`
 
 **Files modified:** `data/local/db/PitiqDatabase.kt` (v2 + LayoutDao), `di/DatabaseModule.kt` (LayoutDao provider), `session/SessionViewModel.kt` (SessionCleaner injection), `ui/navigation/AppNavigation.kt` (state data passed to screens), `ui/screen/attract/AttractScreen.kt`, `ui/screen/payment/PaymentScreen.kt`, `ui/screen/layout/LayoutSelectionScreen.kt`, `ui/screen/capture/PhotoCaptureScreen.kt`, `ui/screen/edit/EditScreen.kt`, `ui/screen/print/PrintScreen.kt`, `ui/screen/upload/UploadScreen.kt`, `ui/screen/qrshare/QRShareScreen.kt`, `app/build.gradle.kts` (buildConfig=true + Supabase BuildConfig fields), `ROADMAP.md`, `SESSION.md`
+
+---
+
+## Session 9 — 2026-05-13
+
+**Topic:** Supabase project configuration + Phase 4 — Backend (Supabase)
+
+**Decisions made:**
+
+| # | Issue | Decision |
+|---|-------|----------|
+| 58 | Supabase key format | Supabase now issues "publishable keys" (`sb_publishable_...`) in place of the old `eyJ...` JWT anon keys. Used publishable key for both the Next.js project and Android `BuildConfig.SUPABASE_ANON_KEY`. Supabase Kotlin SDK 3.1.4 accepts this format. |
+| 59 | `expires_at` column | Implemented as a PostgreSQL generated column (`GENERATED ALWAYS AS (created_at + INTERVAL '24 hours') STORED`) so the database always owns the expiry calculation and the device never needs to send it. |
+| 60 | Storage bucket for updates | Added a third `updates` bucket (public) alongside `sessions` and `layouts` to host `update.json` and APK files. Not in the original roadmap — added because `update.json` needs a stable public URL separate from layout assets. |
+| 61 | UpdateChecker URL config | `UPDATE_JSON_URL` added as a `BuildConfig` field, read from `local.properties` first, then env var, then empty string. Empty string disables the update check silently — safe for dev builds. |
+| 62 | Gradle JDK pin | System Java 25.0.1 caused Kotlin compiler to crash on version string parsing. Fixed permanently by setting `org.gradle.java.home` in `gradle.properties` to Android Studio's bundled JBR (Java 21). |
+| 63 | Hilt 2.52 → 2.56 | Kotlin 2.1.x changed metadata format; Hilt 2.52's annotation processor (`hiltJavaCompileDebug`) could not read it. Upgraded to Hilt 2.56 which supports Kotlin 2.x metadata. This was a pre-existing blocker that also prevented `testDebugUnitTest` from running. |
+| 64 | Next.js project location | Pitiq Next.js share page exists at `Documents/ANDREI_FILES/DEVFILES/PROJECTS/Pitiq/pitiq-app/`. Supabase helper files (`utils/supabase/`) added there. SQL migrations and edge functions also stored there under `supabase/`. |
+
+**Supabase project configured (pitiq-app):**
+- `npm install @supabase/supabase-js @supabase/ssr`
+- `.env.local`: added `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `utils/supabase/server.ts` — server component client helper
+- `utils/supabase/client.ts` — browser client helper
+- `utils/supabase/middleware.ts` — middleware session refresh helper
+- `middleware.ts` (root) — invokes Supabase middleware on every request
+
+**Phase 4 items completed (code):**
+- 4.1.1–4.1.5 SQL migration: sessions, layouts, locations tables + RLS (`supabase/migrations/20260513_001_create_tables.sql`)
+- 4.2.1–4.2.3 Storage setup: sessions/layouts/updates buckets + storage RLS policies (`supabase/migrations/20260513_002_storage_setup.sql`)
+- 4.3.1–4.3.2 Edge function `purge-expired-sessions` + pg_cron schedule SQL (`supabase/functions/purge-expired-sessions/index.ts`, `supabase/migrations/20260513_003_cron_schedule.sql`)
+- 4.4.1–4.4.2 `LayoutSyncManager` — fetches active layouts, compares versions, downloads assets, upserts to Room; triggered on app launch and after every session reset
+- 4.5.1 `update.json` template at `supabase/update.json`
+- 4.5.2 `UpdateChecker` — fetches update.json, compares version, downloads APK, triggers system installer; shows `UpdateAvailableDialog` only when `SessionState.Idle`
+
+**Pending — manual Supabase dashboard tasks (next session):**
+- Run `20260513_001_create_tables.sql` in Supabase SQL editor
+- Run `20260513_002_storage_setup.sql` in Supabase SQL editor
+- Enable `pg_cron` and `pg_net` extensions (Database → Extensions)
+- Run `20260513_003_cron_schedule.sql` to schedule purge job
+- Deploy edge function: `supabase functions deploy purge-expired-sessions`
+- Upload `supabase/update.json` to Supabase Storage `updates/` bucket
+- Verify signed URL generation (4.2.4)
+- Test purge function with manual trigger (4.3.3)
+
+**Build result:** `BUILD SUCCESSFUL` after clearing `.gradle/` and `app/build/` caches and upgrading Hilt.
+
+**Files created (Android):** `di/NetworkModule.kt`, `data/remote/RemoteLayout.kt`, `data/remote/UpdateInfo.kt`, `data/repository/LayoutSyncManager.kt`, `data/update/UpdateChecker.kt`, `ui/screen/update/UpdateAvailableDialog.kt`
+
+**Files created (pitiq-app):** `utils/supabase/server.ts`, `utils/supabase/client.ts`, `utils/supabase/middleware.ts`, `middleware.ts`, `supabase/migrations/20260513_001_create_tables.sql`, `supabase/migrations/20260513_002_storage_setup.sql`, `supabase/migrations/20260513_003_cron_schedule.sql`, `supabase/functions/purge-expired-sessions/index.ts`, `supabase/update.json`
+
+**Files modified (Android):** `data/local/db/dao/LayoutDao.kt` (added `getAll()`), `session/SessionViewModel.kt` (inject `LayoutSyncManager`, trigger sync on session reset), `MainActivity.kt` (inject `UpdateChecker` + `LayoutSyncManager`, run launch checks, overlay update dialog), `app/build.gradle.kts` (`localProps` reader + `UPDATE_JSON_URL` BuildConfig field), `local.properties` (Supabase URL/key + update JSON URL), `gradle.properties` (`org.gradle.java.home` JDK 21 pin), `gradle/libs.versions.toml` (Hilt 2.52 → 2.56), `ROADMAP.md`, `SESSION.md`
+
+**Files modified (pitiq-app):** `.env.local` (Supabase env vars appended), `package.json` (added `@supabase/supabase-js`, `@supabase/ssr`)

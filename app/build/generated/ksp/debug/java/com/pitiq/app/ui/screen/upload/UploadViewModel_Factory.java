@@ -5,11 +5,11 @@ import com.pitiq.app.data.local.db.dao.UploadQueueDao;
 import com.pitiq.app.hardware.media.MediaProcessor;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
+import dagger.internal.Provider;
 import dagger.internal.QualifierMetadata;
 import dagger.internal.ScopeMetadata;
 import io.github.jan.supabase.SupabaseClient;
 import javax.annotation.processing.Generated;
-import javax.inject.Provider;
 
 @ScopeMetadata
 @QualifierMetadata("dagger.hilt.android.qualifiers.ApplicationContext")
@@ -24,7 +24,8 @@ import javax.inject.Provider;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 public final class UploadViewModel_Factory implements Factory<UploadViewModel> {
   private final Provider<Context> contextProvider;
