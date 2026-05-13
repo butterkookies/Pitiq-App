@@ -10,7 +10,7 @@ public final class BuildConfig {
   public static final int VERSION_CODE = 1;
   public static final String VERSION_NAME = "0.1.0";
   // Field from default config.
-  public static final String SHARE_BASE_URL = "https://pitiq.vercel.app";
+  public static final String SHARE_BASE_URL = "https://pitiq-share.vercel.app";
   // Field from default config.
   public static final String SUPABASE_ANON_KEY = "sb_publishable_S5YtIdoejwFvPMPkUF5t2A_4a-Y5iof";
   // Field from default config.

@@ -417,3 +417,130 @@
 - After 5.3.1–5.3.2: update `SHARE_BASE_URL` in `local.properties` to final domain, then rebuild APK
 
 **Files modified (Android):** `app/build.gradle.kts` (`SHARE_BASE_URL` BuildConfig field), `app/src/main/java/com/pitiq/app/ui/screen/upload/UploadViewModel.kt` (use `BuildConfig.SHARE_BASE_URL`), `local.properties` (`SHARE_BASE_URL` placeholder), `ROADMAP.md`, `SESSION.md`
+
+---
+
+## Session 13 — 2026-05-13
+
+**Topic:** Phase 5 — 5.3.1–5.3.2 Vercel deployment (install Vercel plugin, fix 404, set env vars)
+
+**Decisions made:**
+
+| # | Issue | Decision |
+|---|-------|----------|
+| 77 | Vercel plugin install | `vercel/vercel-plugin` marketplace added; plugin `vercel` v0.42.1 installed from `claude-plugins-official`. |
+| 78 | 404 root cause | `pitiq-app` Vercel project was deploying repo root (empty — only README + .claude). Fixed by setting `rootDirectory=pitiq-app` via Vercel REST API. |
+| 79 | No GitHub auto-deploy | `pitiq-app` project had no GitHub integration linked. Worked around by creating `.vercel/project.json` at repo root and deploying via CLI. |
+| 80 | Pre-existing TS error | `app/api/upload/route.ts` used `Parameters<typeof cloudinary.uploader.upload_stream>[0]` which resolved to the callback overload. Fixed to `UploadApiOptions`. |
+| 81 | `cacheComponents` config | Moved from `experimental.cacheComponents` to top-level `cacheComponents` (Next.js 16 change). |
+| 82 | Merge conflict on push | Remote had added `mirroredImages` state + `useEffect` fix for `capturedAt` in `CaptureController.tsx`. Kept both: remote's `useEffect` approach is more correct than our `0` initializer. |
+| 83 | `SUPABASE_SERVICE_ROLE_KEY` | Added to Vercel production env vars (sensitive type). Also updated `.env.local` for local dev. |
+
+**Phase 5 — ALL ITEMS COMPLETE**
+- 5.3.1 `butterkookies/Pitiq` connected to Vercel `pitiq-app`; `rootDirectory=pitiq-app` set
+- 5.3.2 Production URL: `https://pitiq-app.vercel.app`; all three Supabase env vars set
+- Share page live at `https://pitiq-app.vercel.app/session/[sessionId]` — `◐` Partial Prerender
+
+**Files modified (pitiq-app):** `app/api/upload/route.ts` (UploadApiOptions fix), `next.config.ts` (cacheComponents), `components/CaptureController.tsx` (conflict resolved), `.gitignore` (supabase/.temp/), `.env.local` (service role key), `ROADMAP.md`, `SESSION.md`
+
+**Files created (pitiq-app):** `.vercel/project.json` (at repo root for CLI deploys)
+
+---
+
+## Session 14 — 2026-05-13
+
+**Topic:** Phase 5 — Move share page to correct repo (Pitiq-App)
+
+**Decisions made:**
+
+| # | Issue | Decision |
+|---|-------|----------|
+| 84 | Wrong repo | Share page was deployed to `butterkookies/Pitiq` (unrelated web photobooth app). Correct repo is `butterkookies/Pitiq-App` (the mobile project). |
+| 85 | Separate minimal Next.js app | Created `web/` inside `Pitiq Mobile/` — minimal project with only the share page + `utils/supabase/admin.ts`. No auth/SSR/middleware overhead. No `@supabase/ssr` dependency needed. |
+| 86 | New Vercel project | `pitiq-share` (id: `prj_Bx5qxkSyi7bidLkW1JYslrKBQPc6`) created via API; `rootDirectory=web`; all three Supabase env vars added. |
+| 87 | Final share URL | `https://pitiq-share.vercel.app/session/[sessionId]`. `SHARE_BASE_URL` updated in `local.properties`. Android rebuilt. |
+
+**Phase 5 — COMPLETE (correct repo)**
+- Share page live at `https://pitiq-share.vercel.app/session/[sessionId]`
+- Deployed from `butterkookies/Pitiq-App`, `web/` subdirectory
+- Android QR codes point to `https://pitiq-share.vercel.app`
+
+**Files created (Pitiq Mobile):** `web/.gitignore`, `web/package.json`, `web/package-lock.json`, `web/next.config.ts`, `web/tsconfig.json`, `web/postcss.config.mjs`, `web/app/globals.css`, `web/app/layout.tsx`, `web/app/session/[sessionId]/page.tsx`, `web/utils/supabase/admin.ts`, `.vercel/project.json`
+
+**Files modified (Pitiq Mobile):** `local.properties` (`SHARE_BASE_URL` → `pitiq-share.vercel.app`), `ROADMAP.md`, `SESSION.md`
+
+---
+
+## Session 15 — 2026-05-13
+
+**Topic:** Phase 6 — Operator Dashboard (full implementation)
+
+**Decisions made:**
+
+| # | Issue | Decision |
+|---|-------|----------|
+| 88 | Dashboard location | Created `dashboard/` inside `Pitiq Mobile/` repo (same pattern as `web/`). Separate Vercel project for deploy (9.2.2). |
+| 89 | Auth approach | `@supabase/ssr` v0.6.1 used (not plain `@supabase/supabase-js`). Provides cookie-based session management for Next.js App Router server components and middleware. `web/` share page does not need auth, so this dependency is dashboard-only. |
+| 90 | Route protection | `middleware.ts` at dashboard root: unauthenticated requests to `/dashboard/*` redirect to `/login`. Authenticated users on `/login` redirect to `/dashboard`. All session refresh handled in middleware — server components just call `supabase.auth.getUser()`. |
+| 91 | Login UI | Client component with `useTransition` for async `signInWithPassword`. No server action — login requires browser-side Supabase client to set cookies correctly via `@supabase/ssr` browser client. Sign-out uses same pattern. |
+| 92 | Layout upload | Server action in `actions.ts` reads `File` objects from `FormData`, `await`s `arrayBuffer()`, uploads to Supabase Storage `layouts` bucket. Regular server client (carries operator's auth session) used — RLS policy "auth write layouts" covers it. Admin client only in `utils/supabase/admin.ts`, not used in layout actions. |
+| 93 | Layout reorder | Up/down buttons swap `sort_order` values between adjacent layouts. No drag-and-drop library (would add bundle weight for a single operator UX). |
+| 94 | Revenue calculation | `count × ₱40` per time window. `coins_inserted` per session exists in DB but summing it is equivalent since price is fixed. Kept simple. |
+| 95 | useActionState for upload form | Upload form uses `useActionState` (React 19 API) wrapping the server action. Allows error state from the action to be surfaced in the client component without a separate state management layer. |
+
+**Phase 6 items completed:**
+
+- 6.1.1 `dashboard/` — Next.js 16, Tailwind v4, `@supabase/ssr`, TypeScript 5 (same stack as `web/`)
+- 6.1.2 `app/login/page.tsx` — email + password form, amber CTA button, error display
+- 6.1.3 `middleware.ts` — session refresh + redirect guard for all `/dashboard/*` routes
+- 6.2.1 `app/dashboard/page.tsx` — stat cards (today/week/month sessions + ₱ revenue), recent sessions table with status badges
+- 6.2.2 `app/dashboard/failures/page.tsx` — sessions where `print_failed = TRUE`, `error_log` shown as formatted JSON
+- 6.2.3 `app/dashboard/layouts/` — grid of layout cards with preview image, active toggle, delete (confirm dialog), up/down reorder; `UploadForm` with frame + preview file inputs, slot count, text_fields JSON, sort order, active flag
+- 6.2.4 `app/dashboard/devices/page.tsx` — all sessions grouped by `location_id`; last session (relative time), total count, uploaded/pending/failed breakdown
+
+**Build result:** `TypeScript: No errors found` — `npx tsc --noEmit` clean.
+
+**Pending (manual):**
+- Copy `dashboard/.env.local.example` → `dashboard/.env.local`, fill in 3 Supabase keys
+- Create operator Supabase Auth account (9.1.4): Supabase Dashboard → Authentication → Users → Invite
+- Create Vercel project `pitiq-dashboard` with `rootDirectory=dashboard`, set env vars (9.2.2)
+
+**Files created (Pitiq Mobile):** `dashboard/package.json`, `dashboard/next.config.ts`, `dashboard/postcss.config.mjs`, `dashboard/tsconfig.json`, `dashboard/.gitignore`, `dashboard/.env.local.example`, `dashboard/middleware.ts`, `dashboard/utils/supabase/client.ts`, `dashboard/utils/supabase/server.ts`, `dashboard/utils/supabase/admin.ts`, `dashboard/app/globals.css`, `dashboard/app/layout.tsx`, `dashboard/app/page.tsx`, `dashboard/app/login/page.tsx`, `dashboard/app/dashboard/layout.tsx`, `dashboard/app/dashboard/sign-out-button.tsx`, `dashboard/app/dashboard/page.tsx`, `dashboard/app/dashboard/failures/page.tsx`, `dashboard/app/dashboard/layouts/actions.ts`, `dashboard/app/dashboard/layouts/layout-card.tsx`, `dashboard/app/dashboard/layouts/upload-form.tsx`, `dashboard/app/dashboard/layouts/page.tsx`, `dashboard/app/dashboard/devices/page.tsx`
+
+**Files modified (Pitiq Mobile):** `ROADMAP.md`, `SESSION.md`
+
+---
+
+## Session 16 — 2026-05-13
+
+**Topic:** Phase 7 — Security Hardening (7.1 Android + 7.2 Backend)
+
+**Audit findings — all items verified or fixed:**
+
+| # | Item | Result |
+|---|------|--------|
+| 7.1.1 | APK signing configured, keystore not in repo | PASS — `keystore.properties` + `*.jks` gitignored; env-var fallback; signing only applied if keystore exists |
+| 7.1.2 | `android:allowBackup="false"` | PASS — already set since Phase 0 |
+| 7.1.3 | `android:debuggable="false"` in release | FIXED — added `app/src/release/AndroidManifest.xml` overlay as explicit defense-in-depth |
+| 7.1.4 | `android:allowClearUserData="false"` | FIXED — added to `<application>` in `AndroidManifest.xml`; Device Owner policy is primary enforcement |
+| 7.1.5 | EncryptedSharedPreferences for all sensitive data | PASS — `SecurePreferences.kt` uses AES256_GCM values, AES256_SIV keys; covers location_id, PIN, BT secret, BT device address |
+| 7.1.6 | HMAC verification — no static string bypass | PASS + FIXED — `handshakeVerified` gates all COIN/BUFFER messages; HMAC failure disconnects; **switched from `.equals()` to `MessageDigest.isEqual()` for constant-time comparison** |
+| 7.1.7 | Session files deleted from cacheDir after every session | PASS — `cancelSession()` and `resetToAttract()` both call `sessionCleaner.clean(sessionId)` which deletes `cacheDir/session_<id>/` recursively |
+| 7.2.1 | RLS enabled on all Supabase tables | PASS — `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` on sessions, layouts, locations in migration 001 |
+| 7.2.2 | Anon key cannot read other sessions / cannot write layouts | PASS — anon: INSERT-only on sessions; SELECT-only on layouts/locations; no session SELECT for anon; service_role used server-side for share page only |
+| 7.2.3 | Signed URLs 30-min expiry, raw paths never exposed | PASS — `createSignedUrl(..., 1800.seconds)` in `UploadViewModel`; share URL is `/session/<id>`, never a storage path |
+| 7.2.4 | Purge job deletes files at 24h expiry | PASS — edge function verified: lists all files under `sessions/<id>/`, removes, then marks `purged=true`; idempotent on missing files |
+| 7.2.5 | service_role key never in APK | PASS — `SupabaseModule.kt` uses `BuildConfig.SUPABASE_ANON_KEY` only |
+
+**Decisions made:**
+
+| # | Issue | Decision |
+|---|-------|----------|
+| 96 | `HmacVerifier` used string `.equals(ignoreCase=true)` | Changed to `MessageDigest.isEqual()` on lowercase hex strings — constant-time byte comparison. Hex encoding preserves length uniformity so comparison is always over 64 bytes regardless of input. |
+| 97 | `android:allowClearUserData` | Added to manifest for defense-in-depth. Note: attribute is effectively a no-op for non-system apps on API 26+ (OS ignores it). Real enforcement is via Device Owner kiosk policy. |
+| 98 | Release manifest overlay | Added `app/src/release/AndroidManifest.xml` with `android:debuggable="false"`. Redundant with Gradle's automatic release build handling but serves as a safety net and explicit documentation of intent. |
+| 99 | Supabase migration files location | Created `supabase/migrations/` and `supabase/functions/` in `Pitiq Mobile/` repo. These are canonical reference files; they were previously in `pitiq-app` (wrong repo). Sessions 9–10 applied the migrations to the live Supabase project from the pitiq-app location. |
+
+**Files created:** `app/src/release/AndroidManifest.xml`, `supabase/migrations/20260513_001_create_tables.sql`, `supabase/migrations/20260513_002_storage_setup.sql`, `supabase/migrations/20260513_003_cron_schedule.sql`, `supabase/functions/purge-expired-sessions/index.ts`
+
+**Files modified:** `app/src/main/AndroidManifest.xml` (added `allowClearUserData`), `hardware/bluetooth/HmacVerifier.kt` (constant-time comparison), `ROADMAP.md`, `SESSION.md`

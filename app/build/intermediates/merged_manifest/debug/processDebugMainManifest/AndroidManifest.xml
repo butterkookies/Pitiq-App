@@ -61,6 +61,7 @@
     <application
         android:name="com.pitiq.app.PitiqApplication"
         android:allowBackup="false"
+        android:allowClearUserData="false"
         android:appComponentFactory="androidx.core.app.CoreComponentFactory"
         android:debuggable="true"
         android:extractNativeLibs="false"
