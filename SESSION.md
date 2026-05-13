@@ -544,3 +544,64 @@
 **Files created:** `app/src/release/AndroidManifest.xml`, `supabase/migrations/20260513_001_create_tables.sql`, `supabase/migrations/20260513_002_storage_setup.sql`, `supabase/migrations/20260513_003_cron_schedule.sql`, `supabase/functions/purge-expired-sessions/index.ts`
 
 **Files modified:** `app/src/main/AndroidManifest.xml` (added `allowClearUserData`), `hardware/bluetooth/HmacVerifier.kt` (constant-time comparison), `ROADMAP.md`, `SESSION.md`
+
+---
+
+## Session 17 — 2026-05-13
+
+**Topic:** Phase 8 — Unit tests, GitHub release, hardware-free debug mode
+
+### Part A — Phase 8.1 Unit Tests
+
+**Decisions made:**
+
+| # | Issue | Decision |
+|---|-------|----------|
+| 100 | 8.1.4 GIF test needs `android.graphics.Bitmap` | Cannot run in JVM unit tests. Placed in `androidTest/` (instrumented). Same for 8.1.6 (Room in-memory DB requires Android context). All other 8.1 items run as JVM unit tests in `test/`. |
+| 101 | 8.1.2 coin accumulation without mocking BluetoothManager | `BluetoothManager` requires Android `Context` — not mockable in JVM without Mockito/MockK (not in deps). Test mirrors the accumulation logic directly using `MutableStateFlow` + `BluetoothMessage` sealed classes. No Android APIs, pure JVM. Validates the same arithmetic the repository executes. |
+| 102 | 8.1.5 layout merge tested via companion object | `LayoutRepository.defaults` is a public companion `val`. Test calls the merge logic inline (same three lines from `getLayouts()`) without instantiating the repository or Room DAO. No mocking required. |
+
+**Phase 8.1 items completed:**
+
+- 8.1.1 `HmacVerifierTest` — already existed from Phase 2 (2.1.9); marked checked in ROADMAP
+- 8.1.2 `CoinAccumulationLogicTest` — 8 cases: ₱10×4, mixed denominations, overpayment, 40×₱1, buffer response, buffer-only, disconnect ack no-op, reset
+- 8.1.3 `SessionIdTest` — 5 cases: UUID v4 regex, version nibble `4`, RFC 4122 variant bits, five-group format, 100 unique IDs
+- 8.1.4 `GifEncoderTest` (instrumented) — 6 cases: 10-frame burst at 480×640 < 5MB, diverse colors < 5MB, GIF89a header, 0x3B trailer, empty list returns false, single frame encodes
+- 8.1.5 `LayoutMergeTest` — 7 cases: no remote, ID override replaces default, new ID appended, sorted by sortOrder, all defaults overridden, multiple remotes, empty defaults
+- 8.1.6 `UploadQueueTest` (instrumented, Room in-memory DB) — 8 cases: enqueue appears pending, status update removes from pending, multiple offline sessions, delete, Flow emission, duplicate ID replace, failed status excluded, createdAt ordering
+
+**Files created:**
+- `app/src/test/java/com/pitiq/app/hardware/bluetooth/CoinAccumulationLogicTest.kt`
+- `app/src/test/java/com/pitiq/app/session/SessionIdTest.kt`
+- `app/src/test/java/com/pitiq/app/data/repository/LayoutMergeTest.kt`
+- `app/src/androidTest/java/com/pitiq/app/hardware/media/GifEncoderTest.kt`
+- `app/src/androidTest/java/com/pitiq/app/data/local/db/UploadQueueTest.kt`
+
+**Files modified:** `ROADMAP.md` (8.1.x all marked `[x]`)
+
+---
+
+### Part B — GitHub Release + Hardware-Free Debug Mode
+
+**Decisions made:**
+
+| # | Issue | Decision |
+|---|-------|----------|
+| 103 | Printer gate blocks attract screen without hardware | Added `if (BuildConfig.DEBUG) return@launch` in `AttractViewModel.init`. In debug builds, `_printerConnected` stays `true` and the polling loop never runs. Release builds unaffected. |
+| 104 | Payment screen blocked without Bluetooth/coins | Added three debug buttons (`+₱10`, `+₱20`, `+₱40`) to `PaymentScreen`, visible only when `BuildConfig.DEBUG`. Calls `CoinAcceptorRepository.simulateCoin(amount)` which is guarded by `if (!BuildConfig.DEBUG) return`. Buttons styled with subdued dark-gold background to look non-customer-facing; labelled "debug — simulated coins" below. |
+| 105 | GitHub release target | Debug APK (16.6 MB) published to `butterkookies/Pitiq-App` as release `v0.1.0-debug`. APK attached as `pitiq-debug.apk`. Release notes include full walkthrough for hardware-free testing. |
+| 106 | `INSTALL.md` | Step-by-step Oppo/ColorOS sideload guide committed to repo. Covers: download, unknown sources toggle (ColorOS 11 + older), install steps, first-launch flow, kiosk exit procedure, reinstall/reset, build info table, troubleshooting table. |
+
+**Full debug session flow (no hardware):**
+1. Attract screen — tappable immediately (no printer gate)
+2. Payment screen — tap +₱40 once (or +₱10 four times) to fill progress bar → auto-advance
+3. Layout selection → Photo capture (real front camera) → Edit → Print (skipped) → Upload (Supabase over Wi-Fi) → QR share → resets to attract
+
+**Files created:** `INSTALL.md`
+
+**Files modified:**
+- `ui/screen/attract/AttractViewModel.kt` (debug printer gate bypass)
+- `hardware/bluetooth/CoinAcceptorRepository.kt` (added `simulateCoin()`)
+- `ui/screen/payment/PaymentViewModel.kt` (added `simulateCoin()` delegate)
+- `ui/screen/payment/PaymentScreen.kt` (debug coin buttons + imports)
+- `ROADMAP.md` (session number bump)
