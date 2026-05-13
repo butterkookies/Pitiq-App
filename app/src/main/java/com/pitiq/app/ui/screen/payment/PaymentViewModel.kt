@@ -20,6 +20,8 @@ class PaymentViewModel @Inject constructor(
     val coinTotal: StateFlow<Int> = coinAcceptorRepository.coinTotal
     val bluetoothState: StateFlow<BluetoothState> = coinAcceptorRepository.bluetoothState
 
+    fun simulateCoin(amount: Int) = coinAcceptorRepository.simulateCoin(amount)
+
     private val _timeoutCancelled = MutableStateFlow(false)
     val timeoutCancelled: StateFlow<Boolean> = _timeoutCancelled.asStateFlow()
 

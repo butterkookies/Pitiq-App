@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pitiq.app.BuildConfig
 import com.pitiq.app.hardware.bluetooth.BluetoothState
 
 private const val TARGET_AMOUNT = 40
@@ -151,6 +154,29 @@ fun PaymentScreen(
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                 fontSize = 18.sp,
             )
+
+            if (BuildConfig.DEBUG) {
+                Spacer(modifier = Modifier.height(48.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    listOf(10, 20, 40).forEach { amount ->
+                        Button(
+                            onClick = { viewModel.simulateCoin(amount) },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF1A1A00),
+                                contentColor = MaterialTheme.colorScheme.secondary,
+                            ),
+                        ) {
+                            Text(text = "+₱$amount", fontSize = 13.sp)
+                        }
+                    }
+                }
+                Text(
+                    text = "debug — simulated coins",
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.25f),
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(top = 6.dp),
+                )
+            }
         }
 
         // Bluetooth reconnecting overlay

@@ -1,5 +1,6 @@
 package com.pitiq.app.hardware.bluetooth
 
+import com.pitiq.app.BuildConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -47,5 +48,10 @@ class CoinAcceptorRepository @Inject constructor(
     fun resetForNewSession() {
         _coinTotal.value = 0
         bluetoothManager.startNewSession()
+    }
+
+    fun simulateCoin(amount: Int) {
+        if (!BuildConfig.DEBUG) return
+        _coinTotal.update { it + amount }
     }
 }
