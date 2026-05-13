@@ -3,7 +3,7 @@
 > Android photobooth app for coin-operated cafe kiosk machines.
 > Stack: Kotlin + Jetpack Compose (Android), Supabase (PostgreSQL + Storage + Auth + Edge Functions), Vercel (Next.js share page).
 > Target devices: Oppo Reno 5 5G (primary), expandable to tablets and other Android devices. minSdk API 23 (Android 6.0), kiosk mode via Device Owner COSU APIs.
-> Last updated: 2026-05-13 (Session 11)
+> Last updated: 2026-05-13 (Session 17)
 
 ---
 
@@ -310,68 +310,68 @@
 - [x] 5.2.6 No login required — session ID in URL + service role only on server; anon users never get storage paths
 
 ### 5.3 Deployment
-- [ ] 5.3.1 Connect GitHub repo to Vercel (pitiq-app project)
-- [ ] 5.3.2 Set production domain; add `SUPABASE_SERVICE_ROLE_KEY` in Vercel env vars
-- [x] 5.3.3 Share URL moved to `BuildConfig.SHARE_BASE_URL` (reads `SHARE_BASE_URL` from `local.properties` / env var; default `https://pitiq.vercel.app`). Update `local.properties` + Vercel env vars with final domain after 5.3.1–5.3.2.
+- [x] 5.3.1 Minimal Next.js share page created at `web/` inside `butterkookies/Pitiq-App` repo and pushed to GitHub
+- [x] 5.3.2 Vercel project `pitiq-share` created; `rootDirectory=web`; all three Supabase env vars set; production URL: `https://pitiq-share.vercel.app`
+- [x] 5.3.3 `SHARE_BASE_URL=https://pitiq-share.vercel.app` set in `local.properties`; Android APK rebuilt with correct QR URL
 
 ---
 
 ## PHASE 6 — OPERATOR DASHBOARD
 
 ### 6.1 Dashboard Web App
-- [ ] 6.1.1 Create separate web app (Next.js or plain React) for operator dashboard
-- [ ] 6.1.2 Implement Supabase Auth login (email + password, operator accounts only)
-- [ ] 6.1.3 Protect all dashboard routes with Supabase session middleware
+- [x] 6.1.1 Create separate web app (Next.js 16, Tailwind v4, Supabase SSR) at `dashboard/` — separate Vercel project
+- [x] 6.1.2 Implement Supabase Auth login (email + password, operator accounts only) — `app/login/page.tsx`
+- [x] 6.1.3 Protect all dashboard routes with Supabase session middleware — `middleware.ts` redirects unauthenticated requests to `/login`
 
 ### 6.2 Dashboard Features
-- [ ] 6.2.1 **Session Overview:**
-  - [ ] Total sessions today / this week / this month (per location)
-  - [ ] Revenue tracking (sessions × ₱40, grouped by location and date)
-  - [ ] Table of recent sessions with status (uploaded, failed, purged)
-- [ ] 6.2.2 **Print Failure Log:**
-  - [ ] Table of sessions where `print_failed = TRUE`
-  - [ ] Show `error_log` content per session
-- [ ] 6.2.3 **Layout Management:**
-  - [ ] List all layouts with preview
-  - [ ] Upload new layout (frame asset PNG + preview PNG + metadata)
-  - [ ] Set slot count, text fields, sort order, active status
-  - [ ] Reorder layouts (drag handles)
-  - [ ] Deactivate/delete layout
-- [ ] 6.2.4 **Device Status:**
-  - [ ] Last session timestamp per location_id
-  - [ ] Upload status of queued sessions (pending/uploaded/failed)
+- [x] 6.2.1 **Session Overview:** (`app/dashboard/page.tsx`)
+  - [x] Total sessions today / this week / this month (per location)
+  - [x] Revenue tracking (sessions × ₱40, grouped by location and date)
+  - [x] Table of recent sessions with status (uploaded, failed, purged)
+- [x] 6.2.2 **Print Failure Log:** (`app/dashboard/failures/page.tsx`)
+  - [x] Table of sessions where `print_failed = TRUE`
+  - [x] Show `error_log` content per session
+- [x] 6.2.3 **Layout Management:** (`app/dashboard/layouts/`)
+  - [x] List all layouts with preview
+  - [x] Upload new layout (frame asset PNG + preview PNG + metadata) — server action uploads to Supabase Storage `layouts` bucket
+  - [x] Set slot count, text fields, sort order, active status
+  - [x] Reorder layouts (up/down buttons)
+  - [x] Deactivate/delete layout
+- [x] 6.2.4 **Device Status:** (`app/dashboard/devices/page.tsx`)
+  - [x] Last session timestamp per location_id
+  - [x] Upload status of queued sessions (pending/uploaded/failed)
 
 ---
 
 ## PHASE 7 — SECURITY HARDENING
 
 ### 7.1 Android Security
-- [ ] 7.1.1 Verify APK signing is configured and keystore is not committed to repo
-- [ ] 7.1.2 Enable `android:allowBackup="false"` in manifest
-- [ ] 7.1.3 Set `android:debuggable="false"` in release manifest
-- [ ] 7.1.4 Disable `android:allowClearUserData` (or handle via kiosk policy)
-- [ ] 7.1.5 Confirm `EncryptedSharedPreferences` used for all sensitive data (location_id, operator PIN, Bluetooth shared secret)
-- [ ] 7.1.6 Verify Bluetooth HMAC verification: no raw static string unlock accepted
-- [ ] 7.1.7 Verify session files are deleted from `cacheDir` after every session (no residual customer data)
+- [x] 7.1.1 Verify APK signing is configured and keystore is not committed to repo — `keystore.properties` + `*.jks` gitignored; signing config reads from file with env-var fallback; signing only applied if keystore file exists
+- [x] 7.1.2 Enable `android:allowBackup="false"` in manifest — already set since Phase 0
+- [x] 7.1.3 Set `android:debuggable="false"` in release manifest — added `app/src/release/AndroidManifest.xml` override as explicit defense-in-depth on top of Gradle's automatic handling
+- [x] 7.1.4 Disable `android:allowClearUserData` (or handle via kiosk policy) — added `android:allowClearUserData="false"` to `<application>` in manifest; Device Owner kiosk policy is primary enforcement
+- [x] 7.1.5 Confirm `EncryptedSharedPreferences` used for all sensitive data (location_id, operator PIN, Bluetooth shared secret) — verified in `SecurePreferences.kt`: AES256_GCM values, AES256_SIV keys
+- [x] 7.1.6 Verify Bluetooth HMAC verification: no raw static string unlock accepted — verified: `handshakeVerified` flag gates all COIN/BUFFER messages; HMAC failure calls `disconnect()`; switched to `MessageDigest.isEqual` for constant-time comparison
+- [x] 7.1.7 Verify session files are deleted from `cacheDir` after every session (no residual customer data) — verified: `cancelSession()` and `resetToAttract()` both call `sessionCleaner.clean(sessionId)` which deletes `cacheDir/session_<id>` recursively
 
 ### 7.2 Backend Security
-- [ ] 7.2.1 Confirm RLS is enabled on all Supabase tables
-- [ ] 7.2.2 Audit RLS policies: anon key cannot read other sessions, cannot write to layouts
-- [ ] 7.2.3 Confirm signed URLs have short expiry (30 min) and raw storage paths are never exposed
-- [ ] 7.2.4 Confirm purge job deletes files at expiry (24h)
-- [ ] 7.2.5 Rotate Supabase `service_role` key if ever exposed; never embed in APK (use `anon` key only)
+- [x] 7.2.1 Confirm RLS is enabled on all Supabase tables — RLS enabled on `sessions`, `layouts`, `locations` in `supabase/migrations/20260513_001_create_tables.sql`
+- [x] 7.2.2 Audit RLS policies: anon key cannot read other sessions, cannot write to layouts — anon: INSERT only on sessions; SELECT only on layouts/locations; no session reads for anon (share page uses service_role server-side)
+- [x] 7.2.3 Confirm signed URLs have short expiry (30 min) and raw storage paths are never exposed — `createSignedUrl(..., 1800.seconds)` confirmed in `UploadViewModel.kt`; share URL is `SHARE_BASE_URL/session/<id>`, never a raw storage path
+- [x] 7.2.4 Confirm purge job deletes files at expiry (24h) — edge function at `supabase/functions/purge-expired-sessions/index.ts`; deletes all files under `sessions/<id>/` then marks `purged=true`; graceful on missing files; cron schedule in migration 003
+- [x] 7.2.5 Rotate Supabase `service_role` key if ever exposed; never embed in APK (use `anon` key only) — verified: `SupabaseModule.kt` uses only `BuildConfig.SUPABASE_ANON_KEY`; service_role key never appears in Android codebase
 
 ---
 
 ## PHASE 8 — TESTING
 
 ### 8.1 Unit Tests (Android)
-- [ ] 8.1.1 HMAC verification logic (correct challenge → accepted, tampered → rejected)
-- [ ] 8.1.2 Coin total accumulation (various pulse sequences, overpayment)
-- [ ] 8.1.3 Session ID generation (UUID v4 format validation)
-- [ ] 8.1.4 GIF compression: output < 5MB for typical burst sequence
-- [ ] 8.1.5 Layout merge logic (remote overrides default by ID)
-- [ ] 8.1.6 Upload queue: session queued when offline, dequeued when online
+- [x] 8.1.1 HMAC verification logic (correct challenge → accepted, tampered → rejected)
+- [x] 8.1.2 Coin total accumulation (various pulse sequences, overpayment)
+- [x] 8.1.3 Session ID generation (UUID v4 format validation)
+- [x] 8.1.4 GIF compression: output < 5MB for typical burst sequence (instrumented — GifEncoderTest)
+- [x] 8.1.5 Layout merge logic (remote overrides default by ID)
+- [x] 8.1.6 Upload queue: session queued when offline, dequeued when online (instrumented — UploadQueueTest)
 
 ### 8.2 Integration Tests
 - [ ] 8.2.1 Full session flow on-device (coin → layout → capture → edit → print → upload → QR)
@@ -395,13 +395,13 @@
 ## PHASE 9 — DEPLOYMENT
 
 ### 9.1 Backend Deploy
-- [ ] 9.1.1 Apply Supabase migrations (`supabase db push`)
-- [ ] 9.1.2 Deploy edge function (`supabase functions deploy purge-expired-sessions`)
-- [ ] 9.1.3 Confirm cron schedule is active
+- [x] 9.1.1 Supabase migrations applied via `db query --linked --file` (Session 10)
+- [x] 9.1.2 Edge function deployed: `supabase functions deploy purge-expired-sessions` (Session 10)
+- [x] 9.1.3 Cron schedule active via `Deno.cron` inside edge function (Session 10)
 - [ ] 9.1.4 Create operator Supabase Auth account for dashboard
 
 ### 9.2 Web Deploy
-- [ ] 9.2.1 Deploy share page to Vercel, set production domain
+- [x] 9.2.1 Share page deployed to `https://pitiq-share.vercel.app` from `butterkookies/Pitiq-App` `web/` (Session 14)
 - [ ] 9.2.2 Deploy operator dashboard to Vercel (separate project), set auth env vars
 
 ### 9.3 Device Deploy
