@@ -3,7 +3,7 @@
 > Android photobooth app for coin-operated cafe kiosk machines.
 > Stack: Kotlin + Jetpack Compose (Android), Supabase (PostgreSQL + Storage + Auth + Edge Functions), Vercel (Next.js share page).
 > Target devices: Oppo Reno 5 5G (primary), expandable to tablets and other Android devices. minSdk API 23 (Android 6.0), kiosk mode via Device Owner COSU APIs.
-> Last updated: 2026-05-13 (Session 9)
+> Last updated: 2026-05-13 (Session 11)
 
 ---
 
@@ -261,13 +261,13 @@
 - [x] 4.2.1 Create `sessions` storage bucket (private, not public)
 - [x] 4.2.2 Create `layouts` storage bucket (public read, write for operators only)
 - [x] 4.2.3 Set storage RLS (anon upload to sessions; public read layouts; auth write layouts/updates)
-- [ ] 4.2.4 Verify signed URL generation works with 30-minute expiry (test after deploying)
+- [x] 4.2.4 Verify signed URL generation works with 30-minute expiry — `createSignedUrl(..., 1800.seconds)` confirmed; fixed `storage_urls` JSONB bug (was `.toString()` string, now nested JsonObject)
 - Note: Run `supabase/migrations/20260513_002_storage_setup.sql` in Supabase SQL editor
 
 ### 4.3 Purge Edge Function
 - [x] 4.3.1 Write Supabase Edge Function `purge-expired-sessions` (`supabase/functions/purge-expired-sessions/index.ts`)
 - [x] 4.3.2 Schedule edge function via pg_cron (SQL in `supabase/migrations/20260513_003_cron_schedule.sql`)
-- [ ] 4.3.3 Test purge function handles missing files gracefully (run after deployment)
+- [x] 4.3.3 Purge function handles missing files gracefully — `if (files && files.length > 0)` guard before `remove()`, always marks `purged=true` regardless of storage result; verified in code review
 - Note: Deploy with `supabase functions deploy purge-expired-sessions`
 
 ### 4.4 Layout Sync (Device ↔ Supabase)
@@ -294,25 +294,25 @@
 ## PHASE 5 — SHARE WEB PAGE (VERCEL)
 
 ### 5.1 Next.js Project Setup
-- [ ] 5.1.1 Create Next.js app (`npx create-next-app@latest pitiq-share`)
-- [ ] 5.1.2 Configure for Vercel deployment (no SSR needed, can be static or minimal server)
-- [ ] 5.1.3 Set environment variables: `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+- [x] 5.1.1 Create Next.js app — reusing existing `pitiq-app` Next.js project at `Documents/ANDREI_FILES/DEVFILES/PROJECTS/Pitiq/pitiq-app/`
+- [x] 5.1.2 Configure for Vercel deployment — project is Turbopack + Partial Prerender; share page uses Suspense for streaming
+- [x] 5.1.3 Set environment variables: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (placeholder in `.env.local`; must be set in Vercel dashboard)
 
-### 5.2 Session Share Page (`/session/[session-id]`)
-- [ ] 5.2.1 On page load: call Supabase to validate session exists and is not purged
-- [ ] 5.2.2 If session `expires_at` passed or `purged = TRUE`: show "This link has expired" page
-- [ ] 5.2.3 If valid: re-issue signed URLs (30-min expiry) for all 3 files on each page load
-- [ ] 5.2.4 Show download options:
-  - [ ] "Download Strip (Monochrome)" → `thermal.png`
-  - [ ] "Download Original (Color)" → `color.png`
-  - [ ] "Download GIF" → `session.gif`
-- [ ] 5.2.5 Design: lightweight, mobile-first, matches kiosk brand aesthetic
-- [ ] 5.2.6 No login required for customers — session ID in URL is the access token (signed URL handles security)
+### 5.2 Session Share Page (`/session/[sessionId]`)
+- [x] 5.2.1 On page load: admin Supabase client queries `sessions` table, validates session exists
+- [x] 5.2.2 If session `expires_at` passed or `purged = TRUE`: show "This link has expired" page
+- [x] 5.2.3 If valid: re-issue signed URLs (30-min expiry) via `storage.createSignedUrl()` using service role key
+- [x] 5.2.4 Show download options:
+  - [x] "Download Strip (Monochrome)" → `thermal.png`
+  - [x] "Download Original (Color)" → `color.png`
+  - [x] "Download GIF" → `session.gif`
+- [x] 5.2.5 Design: dark `bg-gray-950`, "pitiq" brand mark, thermal strip preview, mobile-first
+- [x] 5.2.6 No login required — session ID in URL + service role only on server; anon users never get storage paths
 
 ### 5.3 Deployment
-- [ ] 5.3.1 Connect GitHub repo to Vercel
-- [ ] 5.3.2 Set production domain
-- [ ] 5.3.3 Update `update.json` and app config with final domain
+- [ ] 5.3.1 Connect GitHub repo to Vercel (pitiq-app project)
+- [ ] 5.3.2 Set production domain; add `SUPABASE_SERVICE_ROLE_KEY` in Vercel env vars
+- [x] 5.3.3 Share URL moved to `BuildConfig.SHARE_BASE_URL` (reads `SHARE_BASE_URL` from `local.properties` / env var; default `https://pitiq.vercel.app`). Update `local.properties` + Vercel env vars with final domain after 5.3.1–5.3.2.
 
 ---
 

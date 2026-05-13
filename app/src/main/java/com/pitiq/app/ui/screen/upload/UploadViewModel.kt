@@ -87,16 +87,18 @@ class UploadViewModel @Inject constructor(
                 put("location_id", session.locationId)
                 put("coins_inserted", session.coinsInserted)
                 put("printed", session.printSuccess == true)
+                put("print_failed", session.printSuccess == false)
                 put("upload_status", "uploaded")
+                put("upload_attempted_at", java.time.Instant.now().toString())
                 put("storage_urls", buildJsonObject {
                     put("thermal", thermalUrl)
                     put("color", colorUrl)
                     put("gif", gifUrl)
-                }.toString())
+                })
             }
         )
 
-        "https://pitiq.vercel.app/session/$sessionId"
+        "${com.pitiq.app.BuildConfig.SHARE_BASE_URL}/session/$sessionId"
     }
 
     private suspend fun queueForRetry(session: Session) {

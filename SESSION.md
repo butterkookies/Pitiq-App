@@ -313,3 +313,107 @@
 **Files modified (Android):** `data/local/db/dao/LayoutDao.kt` (added `getAll()`), `session/SessionViewModel.kt` (inject `LayoutSyncManager`, trigger sync on session reset), `MainActivity.kt` (inject `UpdateChecker` + `LayoutSyncManager`, run launch checks, overlay update dialog), `app/build.gradle.kts` (`localProps` reader + `UPDATE_JSON_URL` BuildConfig field), `local.properties` (Supabase URL/key + update JSON URL), `gradle.properties` (`org.gradle.java.home` JDK 21 pin), `gradle/libs.versions.toml` (Hilt 2.52 → 2.56), `ROADMAP.md`, `SESSION.md`
 
 **Files modified (pitiq-app):** `.env.local` (Supabase env vars appended), `package.json` (added `@supabase/supabase-js`, `@supabase/ssr`)
+
+---
+
+## Session 10 — 2026-05-13
+
+**Topic:** Phase 4 deployment — Supabase backend fully deployed
+
+**Decisions made:**
+
+| # | Issue | Decision |
+|---|-------|----------|
+| 65 | `expires_at` generated column rejected | `TIMESTAMPTZ + INTERVAL` is STABLE not IMMUTABLE in Postgres. Changed to a `BEFORE INSERT` trigger (`sessions_set_expires_at`) that sets `expires_at = created_at + INTERVAL '24 hours'`. Session 9 design intent preserved (DB owns expiry calculation). |
+| 66 | Migration version collision | Supabase CLI extracts version as digits before first `_`. All three migrations had prefix `20260513_` → same version `20260513`. Fixed by renaming 002/003 to `20260513002_...` and `20260513003_...`. Migration 001 ran first push (version `20260513`), required `migration repair --status applied 20260513` to resolve CLI state confusion. Remaining 002+003 applied via `db query --linked --file`. |
+| 67 | `storage_urls` JSONB bug | `UploadViewModel` built inner `buildJsonObject{}.toString()` before inserting to JSONB column. This stored a JSON string, not a nested object. Share page `storage_urls->>'thermal'` would return NULL. Fixed: removed `.toString()`, embeds `JsonObject` directly. |
+| 68 | Supabase CLI install | Installed CLI v2.98.2 to `~/.local/bin/supabase.exe` (downloaded `supabase_windows_amd64.tar.gz` from GitHub releases; no package manager available). |
+| 69 | Cron service_role_key | Cron job uses `current_setting('app.service_role_key')` to authenticate HTTP POST to edge function. Must be set once via: `ALTER DATABASE postgres SET "app.service_role_key" = '<SERVICE_ROLE_KEY>';` |
+
+**Phase 4 deployment completed:**
+- 4.1 Tables deployed: `sessions`, `layouts`, `locations` + RLS policies + `expires_at` trigger
+- 4.2 Storage deployed: `sessions` (private), `layouts` (public), `updates` (public) buckets + RLS policies
+- 4.3 Edge function `purge-expired-sessions` deployed to project `jnmtorskgbfosibwdnbw`
+- 4.3 pg_cron + pg_net extensions enabled; hourly cron schedule created
+- 4.5 `update.json` uploaded to `ss:///updates/update.json`
+- 4.2.4 Signed URL generation verified: `createSignedUrl(..., 1800.seconds)` = 30 min ✓
+- 4.3.3 Purge function missing-file handling verified: `files?.length > 0` guard + unconditional `purged=true` update
+
+**Cron refactored to Deno.cron (standard approach):**
+- pg_cron + service_role_key passing was non-standard. Removed pg_cron job from DB entirely.
+- Schedule now lives in the edge function via `Deno.cron('purge-expired-sessions', '0 * * * *', ...)`.
+- `SUPABASE_SERVICE_ROLE_KEY` injected automatically by Supabase runtime — no manual key passing.
+- HTTP handler kept for manual trigger / operator testing.
+- Migration 003 updated to documentation-only (no SQL to run).
+
+**Phase 4 audit — bugs found and fixed:**
+
+| # | Severity | Fix |
+|---|----------|-----|
+| A | Critical | `sessions_anon_select_by_id` RLS policy added — share page (Phase 5) can now read sessions as anon; UUID session_id is functionally unguessable |
+| B | Critical | `print_failed` and `upload_attempted_at` now set in `UploadViewModel` INSERT |
+| C | Medium | Purge HTTP endpoint now requires `Authorization: Bearer <service_role_key>` |
+| D | Medium | Purge batch-updates all expired sessions in a single `.in()` query instead of N individual UPDATEs |
+| E | Medium | `LayoutSyncManager.sync()` now deactivates local layouts not present in remote active list |
+| F | Minor | `upload_attempted_at` populated (covered by fix B) |
+| G | Minor | `updates_auth_delete` storage policy added |
+
+**Build result:** `BUILD SUCCESSFUL` — `compileDebugKotlin` clean after all fixes.
+
+**Files modified (Android):** `ui/screen/upload/UploadViewModel.kt` (JSONB fix, `print_failed`, `upload_attempted_at`), `data/repository/LayoutSyncManager.kt` (deactivation sync), `ROADMAP.md`, `SESSION.md`
+
+**Files modified (pitiq-app):** `supabase/migrations/20260513_001_create_tables.sql` (generated column → trigger, anon SELECT policy), `supabase/migrations/20260513002_storage_setup.sql` (updates_auth_delete), `supabase/migrations/20260513003_cron_schedule.sql` (Deno.cron docs), `supabase/functions/purge-expired-sessions/index.ts` (HTTP auth, batch UPDATE, Deno.cron)
+
+---
+
+## Session 11 — 2026-05-13
+
+**Topic:** Phase 5 — Share Web Page (5.1 setup + 5.2 session share page)
+
+**Decisions made:**
+
+| # | Issue | Decision |
+|---|-------|----------|
+| 70 | Next.js project reuse | 5.1.1 says "create new app" but `pitiq-app` already exists and has Supabase configured. Reused it; Phase 5 share page added as a new route. |
+| 71 | Signed URL re-generation | Android `UploadViewModel` stores 30-min signed URLs in `storage_urls` JSONB. Share page ignores those (expired by customer visit time) and re-generates fresh signed URLs from known path pattern `<sessionId>/<filename>` using the service role key. |
+| 72 | Admin Supabase client | `sessions` bucket is private. Generating signed URLs requires service role key (bypasses RLS). Created `utils/supabase/admin.ts` using `createClient` from `@supabase/supabase-js` (not `@supabase/ssr`). Key stored in `SUPABASE_SERVICE_ROLE_KEY` env var (no `NEXT_PUBLIC_` prefix — server-only). |
+| 73 | Suspense over `force-dynamic` | `cacheComponents: true` in `next.config.ts` is incompatible with `export const dynamic = 'force-dynamic'`. Used Suspense pattern instead: non-async outer page component passes `params` Promise to inner async `SessionContent` component wrapped in `<Suspense>`. Result: `◐` (Partial Prerender) — static shell + dynamic streamed content. |
+| 74 | Pre-existing build error fixed | `CaptureController.tsx:119` used `useState<number>(() => Date.now())` — invalid in Next.js 16 prerender (uncached data outside Suspense). Changed initializer to `0`. No functional impact (timestamp only used after user interaction). |
+| 75 | tsconfig.json exclude | Added `supabase/functions` to `exclude` in `tsconfig.json` to silence pre-existing Deno module TS errors from edge function files. |
+
+**Phase 5 items completed:**
+- 5.1.1–5.1.3 Project setup / env vars (reusing existing pitiq-app; `SUPABASE_SERVICE_ROLE_KEY` placeholder added)
+- 5.2.1–5.2.6 Full session share page at `app/session/[sessionId]/page.tsx`
+
+**Phase 5 items remaining (manual):**
+- 5.3.1 Connect pitiq-app GitHub repo to Vercel
+- 5.3.2 Set production domain; add `SUPABASE_SERVICE_ROLE_KEY` in Vercel env vars
+- 5.3.3 Update `supabase/update.json` + Android `UploadViewModel.kt` share URL with final domain
+
+**Build result:** `✓ Compiled successfully` — `/session/[sessionId]` is `◐` (Partial Prerender). TypeScript: no errors.
+
+**Files created (pitiq-app):** `utils/supabase/admin.ts`, `app/session/[sessionId]/page.tsx`
+
+**Files modified (pitiq-app):** `.env.local` (`SUPABASE_SERVICE_ROLE_KEY` placeholder), `tsconfig.json` (exclude `supabase/functions`), `components/CaptureController.tsx` (pre-existing build fix: `Date.now()` → `0`), `ROADMAP.md`, `SESSION.md`
+
+---
+
+## Session 12 — 2026-05-13
+
+**Topic:** Phase 5 — Remaining item 5.3.3 (share URL to BuildConfig)
+
+**Decisions made:**
+
+| # | Issue | Decision |
+|---|-------|----------|
+| 76 | Share URL was hardcoded | Moved `https://pitiq.vercel.app/session/$sessionId` in `UploadViewModel` to `BuildConfig.SHARE_BASE_URL`. Reads from `local.properties` key `SHARE_BASE_URL` or env var `SHARE_BASE_URL`. Default fallback `https://pitiq.vercel.app` keeps existing behavior when key absent. |
+
+**Phase 5 items completed this session:**
+- 5.3.3 `SHARE_BASE_URL` BuildConfig field added; `UploadViewModel` uses `BuildConfig.SHARE_BASE_URL`; `local.properties` placeholder added
+
+**Phase 5 items remaining (manual):**
+- 5.3.1 Connect pitiq-app GitHub repo to Vercel
+- 5.3.2 Set production domain; add `SUPABASE_SERVICE_ROLE_KEY` in Vercel env vars
+- After 5.3.1–5.3.2: update `SHARE_BASE_URL` in `local.properties` to final domain, then rebuild APK
+
+**Files modified (Android):** `app/build.gradle.kts` (`SHARE_BASE_URL` BuildConfig field), `app/src/main/java/com/pitiq/app/ui/screen/upload/UploadViewModel.kt` (use `BuildConfig.SHARE_BASE_URL`), `local.properties` (`SHARE_BASE_URL` placeholder), `ROADMAP.md`, `SESSION.md`

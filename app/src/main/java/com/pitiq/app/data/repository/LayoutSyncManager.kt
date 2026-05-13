@@ -37,14 +37,21 @@ class LayoutSyncManager @Inject constructor(
                 local == null || remote.version > local
             }
 
-            if (toUpdate.isEmpty()) return@runCatching
-
-            for (layout in toUpdate) {
-                layout.frameAssetUrl?.let { downloadAsset(it, frameFile(layout.id)) }
-                layout.previewUrl?.let { downloadAsset(it, previewFile(layout.id)) }
+            // Upsert changed layouts
+            if (toUpdate.isNotEmpty()) {
+                for (layout in toUpdate) {
+                    layout.frameAssetUrl?.let { downloadAsset(it, frameFile(layout.id)) }
+                    layout.previewUrl?.let { downloadAsset(it, previewFile(layout.id)) }
+                }
+                layoutDao.upsertAll(toUpdate.map { it.toEntity() })
             }
 
-            layoutDao.upsertAll(toUpdate.map { it.toEntity() })
+            // Deactivate local layouts no longer active on server
+            val remoteActiveIds = remoteLayouts.map { it.id }.toSet()
+            val stale = layoutDao.getAll().filter { it.id !in remoteActiveIds && it.isActive }
+            if (stale.isNotEmpty()) {
+                layoutDao.upsertAll(stale.map { it.copy(isActive = false) })
+            }
         }
         // Silently ignore network errors — cached layouts remain in use
     }

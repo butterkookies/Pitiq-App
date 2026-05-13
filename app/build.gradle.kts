@@ -44,9 +44,13 @@ android {
         val updateJsonUrl = localProps.getProperty("UPDATE_JSON_URL")
             ?: System.getenv("UPDATE_JSON_URL")
             ?: ""
+        val shareBaseUrl = localProps.getProperty("SHARE_BASE_URL")
+            ?: System.getenv("SHARE_BASE_URL")
+            ?: "https://pitiq.vercel.app"
         buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"$supabaseKey\"")
         buildConfigField("String", "UPDATE_JSON_URL", "\"$updateJsonUrl\"")
+        buildConfigField("String", "SHARE_BASE_URL", "\"$shareBaseUrl\"")
     }
 
     signingConfigs {
